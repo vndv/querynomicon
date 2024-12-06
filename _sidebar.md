@@ -1,5 +1,5 @@
 <!--_sidebar.md-->
-* [home](/README.md)
+* [Домой](/README.md)
 
-* [intro](/resources/introduction.md)
-* [core_features](/resources/core_features.md)
+* [Введение](/resources/introduction.md)
+* [Основные функции](/resources/core_features.md)
