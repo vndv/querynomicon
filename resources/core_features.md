@@ -42,15 +42,17 @@ Adelie|Torgersen|36.7|18.8|187.0|3800.0|FEMALE
 Выходной формат будет не всегда понятнен для вас.
 
 
-##  Административные команды
+##  Административные команды базы данных SQLite
 
-> .headers on
+- .headers on - показывать заголовки столбцов таблицы
+- .mode markdown - использовать разметку отображения
 
-> .mode markdown
+.mode markdown и .headers делают вывод более читабельным. После примнения этих команд вывод данных примет следующий вид.
 
-> select * from little_penguins;
-
-
+```sql
+select * from little_penguins;
+```
+```
 |  species  |  island   | bill_length_mm | bill_depth_mm | flipper_length_mm | body_mass_g |  sex   |
 |-----------|-----------|----------------|---------------|-------------------|-------------|--------|
 | Gentoo    | Biscoe    | 51.3           | 14.2          | 218.0             | 5300.0      | MALE   |
@@ -63,10 +65,9 @@ Adelie|Torgersen|36.7|18.8|187.0|3800.0|FEMALE
 | Gentoo    | Biscoe    | 42.6           | 13.7          | 213.0             | 4950.0      | FEMALE |
 | Gentoo    | Biscoe    | 52.1           | 17.0          | 230.0             | 5550.0      | MALE   |
 | Adelie    | Torgersen | 36.7           | 18.8          | 187.0             | 3800.0      | FEMALE |
+```
 
-.mode markdown и .headers делают вывод более читабельным.
-Эти административные команды SQLite начинаются с  точки . и не являются частью стандарта SQL
-Специальные команды PostgreSQL начинаются с косой черты\
+Административные команды SQLite начинаются с  точки . и не являются частью стандарта SQL. Специальные команды PostgreSQL начинаются с косой черты \
 Каждая команда должна располагаться на отдельной строке.
 Используйте .help для получения полного списка
 И, как упоминалось ранее, используйте .quit для выхода.
@@ -80,7 +81,7 @@ select
     sex
 from little_penguins;
 ```
-
+```
 |  species  |  island   |  sex   |
 |-----------|-----------|--------|
 | Gentoo    | Biscoe    | MALE   |
@@ -93,10 +94,11 @@ from little_penguins;
 | Gentoo    | Biscoe    | FEMALE |
 | Gentoo    | Biscoe    | MALE   |
 | Adelie    | Torgersen | FEMALE |
+```
 
-Укажите имена столбцов, разделенные запятыми.
-В любом порядке
-Дубликаты разрешены
+Для выбора определённых колонок укажите их имена разделенные запятыми.
+В любом порядке!
+Дубликаты разрешены!
 Разрывы строк приветствуются для удобства чтения, вам все вернется.
 
 ## Cортировка результатов запроса
@@ -108,9 +110,8 @@ select
     island
 from little_penguins
 order by island asc, sex desc;
-
 ```
-
+```
 |  species  |  sex   |  island   |
 |-----------|--------|-----------|
 | Gentoo    | MALE   | Biscoe    |
@@ -123,15 +124,15 @@ order by island asc, sex desc;
 | Adelie    | FEMALE | Dream     |
 | Adelie    | FEMALE | Torgersen |
 | Adelie    | FEMALE | Torgersen |
-
-порядок должен следовать из (который должен следовать первым за выбором)
-asc — по возрастанию, desc — по убыванию
-По умолчанию — по возрастанию, но укажите, пожалуйста.
-
+```
+`order by` должен следовать после `from` (который должен следовать первым за `select`)
+- asc — сортировка по возрастанию,
+- desc — по убыванию.
+По умолчанию — выполняется сортировка по возрастанию, но лучше укажите, пожалуйста.
 
 ### Упражнения
 
-Напишите SQL-запрос для выбора столбцов пола и массы тела из Little_penguins в указанном порядке, отсортированных таким образом, чтобы сначала отображалась наибольшая масса тела.
+Напишите SQL-запрос для выбора столбцов `sex` - пол и `body_mass_g` - масса тела из таблицы `Little_penguins`, отсортированных таким образом, чтобы сначала отображалась наибольшая масса тела.
 
 - Полный набор данных содержит 344 строки.
 
@@ -146,7 +147,7 @@ from penguins
 order by species, sex, island
 limit 10;
 ```
-
+```
 | species |  sex   |  island   |
 |---------|--------|-----------|
 | Adelie  |        | Dream     |
@@ -159,6 +160,7 @@ limit 10;
 | Adelie  | FEMALE | Biscoe    |
 | Adelie  | FEMALE | Biscoe    |
 | Adelie  | FEMALE | Biscoe    |
+```
 
 - Комментарии начинаются с -- и продолжаются до конца строки.
 - предел N указывает максимальное количество строк, возвращаемых запросом
@@ -174,7 +176,7 @@ from penguins
 order by species, sex, island
 limit 10 offset 3;
 ```
-
+```
 | species |  sex   |  island   |
 |---------|--------|-----------|
 | Adelie  |        | Torgersen |
@@ -187,7 +189,7 @@ limit 10 offset 3;
 | Adelie  | FEMALE | Biscoe    |
 | Adelie  | FEMALE | Biscoe    |
 | Adelie  | FEMALE | Biscoe    |
-
+```
 - смещение N должно соответствовать пределу
 - Указывает количество строк, которые нужно пропустить с начала выделения.
 - Таким образом, этот запрос пропускает первые 3 и показывает следующие 10.
@@ -202,7 +204,7 @@ select distinct
     island
 from penguins;
 ```
-
+```
 |  species  |  sex   |  island   |
 |-----------|--------|-----------|
 | Adelie    | MALE   | Torgersen |
@@ -218,7 +220,7 @@ from penguins;
 | Gentoo    | FEMALE | Biscoe    |
 | Gentoo    | MALE   | Biscoe    |
 | Gentoo    |        | Biscoe    |
-
+```
 
 - отдельное ключевое слово должно появиться сразу после выбора
 - SQL должен был читаться как английский
@@ -243,7 +245,7 @@ select distinct
 from penguins
 where island = 'Biscoe';
 ```
-
+```
 | species |  sex   | island |
 |---------|--------|--------|
 | Adelie  | FEMALE | Biscoe |
@@ -251,6 +253,7 @@ where island = 'Biscoe';
 | Gentoo  | FEMALE | Biscoe |
 | Gentoo  | MALE   | Biscoe |
 | Gentoo  |        | Biscoe |
+```
 
 - где условие фильтрует строки, полученные в результате выбора
 Условие оценивается независимо для каждой строки
