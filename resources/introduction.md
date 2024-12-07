@@ -57,8 +57,7 @@
 ## Подключение к базе данных
 
 
-![Ingress](/assets/asset1.png)
-
+ <img src="./assets/asset1.png" alt="Описание" style="max-width:100%; height:auto;">
 
 
 ```sql
