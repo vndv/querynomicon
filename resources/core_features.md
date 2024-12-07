@@ -136,7 +136,7 @@ order by island asc, sex desc;
 
 #### Упражнения
 
-- Напишите SQL-запрос для выбора столбцов `sex` - пол и `body_mass_g` - масса тела из таблицы `Little_penguins`, отсортированных таким образом, чтобы сначала отображалась наибольшая масса тела. [Выполнить задание онлайн](https://sqltest.online/ru/question/sql-basics/sort-pinguins)
+- Напишите SQL-запрос для выбора столбцов `sex` - пол и `body_mass_g` - масса тела из таблицы `little_penguins`, отсортированных таким образом, чтобы сначала отображалась наибольшая масса тела. [Выполнить задание онлайн](https://sqltest.online/ru/question/sql-basics/sort-pinguins)
 
 ## Ограничение результата запроса
 
