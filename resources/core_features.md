@@ -399,7 +399,7 @@ limit 5;
 ##### Упражнения
 Используйте команду SQLite .nullvalue, чтобы изменить печатное представление значения null на строку null, а затем повторно запустите предыдущий запрос. Когда будет легче понять отображение null как null? Когда это может ввести в заблуждение?
 
-## Нулевое равенство
+## Сравнение с `null`
 
 ([онлайн демо](https://sqlize.online/sql/sqlite3_data/0c62d806cfb999a431d3c78b488d965d/))
 
@@ -440,8 +440,6 @@ where island = 'Biscoe' and sex = 'FEMALE';
 | Gentoo  | FEMALE | Biscoe |
 ```
 
-## Нулевое неравенство
-
 ([онлайн демо](https://sqlize.online/sql/sqlite3_data/b77d9e619645f3562fe18b0bec573ed6/))
 
 - Но если мы спросим о пингвинах, не являющихся самками, их мы тоже получим
@@ -481,7 +479,7 @@ select null = null;
  <img src="./assets/logic.png" alt="Описание" style="max-width:100%; height:auto;">
 
 
-## Безопасная обработка Null значений
+## Безопасная обработка `null` значений
 
 ([онлайн демо](https://sqlize.online/sql/sqlite3_data/9fcfbdccb6ba09efcdfba07940429a40/))
 
