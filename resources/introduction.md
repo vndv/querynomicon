@@ -1,6 +1,6 @@
 # Введение <!-- {docsify-ignore-all} -->
 
-*Список терминов: [База данных (database)](/#/resources/glossary?id=База-данных-database), [Система управления базой данных (СУБД) (Database Management System, DBMS)](/#/resources/glossary?id=Система-управления-базой-данных-СУБД-database-management-system-dbms), [База данных NoSQL (NoSQL database)](/#/resources/glossary?id=База-данных-nosql-nosql-database), [Система управления реляционной базой данных (СУРДБ) (Relational Database Management System, RDBMS)](/#/resources/glossary?id=Система-управления-реляционной-базой-данных-СУРДБ-relational-database-management-system-rdbms),[Таблица (table)](/#/resources/glossary?id=Таблица-table)
+*Список терминов: [База данных (database)](/resources/glossary.md?id=База-данных-database), [Система управления базой данных (СУБД) (Database Management System, DBMS)](/resources/glossary.md?id=Система-управления-базой-данных-СУБД-database-management-system-dbms), [База данных NoSQL (NoSQL database)](/resources/glossary.md?id=База-данных-nosql-nosql-database), [Система управления реляционной базой данных (СУРДБ) (Relational Database Management System, RDBMS)](/resources/glossary.md?id=Система-управления-реляционной-базой-данных-СУРДБ-relational-database-management-system-rdbms),[Таблица (table)](/resources/glossary.md?id=Таблица-table)
 
 ## Что это все такое
 
