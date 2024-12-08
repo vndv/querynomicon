@@ -30,11 +30,23 @@
         position: "top",
         color: "var(--theme-color,#42b983)",
         height: "10px",
-      }
+      },
+      pagination: {
+    previousText: 'В прошлое',
+    // or
+    nextText: {
+      '/en/': 'NEXT',
+      '/': 'В будущее'
+    },
+    crossChapter: true,
+    crossChapterText: true,
+  },
     }
   </script>
   <!-- Docsify v4 -->
   <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify-progress@latest/dist/progress.min.js"></script>
+  <script src="//unpkg.com/docsify-pagination/dist/docsify-pagination.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify-corner/dist/docsify-corner.min.js"></script>
 </body>
 </html>
