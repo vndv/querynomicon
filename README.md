@@ -1,6 +1,6 @@
 # QUERYNOMICON
 
-## Введение в SQL для осторожных и утомленных
+## Введение в SQL для осторожных и утомленных <!-- {docsify-ignore} -->
 
 > Всем привет!
 > Это перевод туториала по SQL от Greg Wilson автора [Software Design by Example in Python](https://third-bit.com/sdxpy/) 
