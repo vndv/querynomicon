@@ -2,7 +2,7 @@
 
 ## Агрегация
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/d208c0b539b4be11345c3a2e6ed8f9d2/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/d208c0b539b4be11345c3a2e6ed8f9d2/))
 
 ```sql
 select
@@ -21,7 +21,7 @@ from penguins;
 
 ### Общие функции агрегирования
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/bcee1003096fc086d60954f2f6ad6a85/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/bcee1003096fc086d60954f2f6ad6a85/))
 
 ```sql
 select
@@ -45,7 +45,7 @@ from penguins;
 
 ### Подсчет
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/783908785044a5c9066acf9632e4ccc8/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/783908785044a5c9066acf9632e4ccc8/))
 
 ```sql
 select
@@ -70,7 +70,7 @@ from penguins;
 
 ### Группировка
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/d1a1b06d5abbd587add37331d645b00c/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/d1a1b06d5abbd587add37331d645b00c/))
 
 ```sql
 select 
@@ -93,7 +93,7 @@ group by sex;
 
 ### Поведение неагрегированных столбцов
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/23ec4ad50459f657b5ee0cfe5b3ce0af/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/23ec4ad50459f657b5ee0cfe5b3ce0af/))
 
 ```sql
 select
@@ -114,7 +114,7 @@ group by sex;
 
 ### Произвольный выбор при агрегировании
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/6b20be9d42a236102d074f219291470b/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/6b20be9d42a236102d074f219291470b/))
 
 ```sql
 select
@@ -145,7 +145,7 @@ group by sex;
 
 ### Фильтрация агрегированных значений
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/d2a2ad0c36bc566830a0e7a5e0a9065a/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/d2a2ad0c36bc566830a0e7a5e0a9065a/))
 
 ```sql
 select
@@ -172,7 +172,7 @@ having average_mass_g > 4000.0;
 
 ### Читаемый вывод
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/0533124bddd2a3ce1007cb55123ace29/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/0533124bddd2a3ce1007cb55123ace29/))
 
 ```sql
 select
@@ -193,7 +193,7 @@ having average_mass_g > 4000.0;
 
 ###  Фильтрация агрегируемых данных
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/b57970c1f981d1af69e177f418e20e30/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/b57970c1f981d1af69e177f418e20e30/))
 
 ```sql
 select
@@ -239,7 +239,7 @@ sqlite3 :memory:
 
 ### Создание таблиц
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/22173e8fc5b77d40add8716b72690474/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/22173e8fc5b77d40add8716b72690474/))
 
 ```sql
 create table job (

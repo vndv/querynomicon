@@ -74,7 +74,7 @@ select * from little_penguins;
 
 ## Выбор колонок 
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/9484db9d3625b78b2ad204aa48596150/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/9484db9d3625b78b2ad204aa48596150/))
 
 ```sql
 select
@@ -105,7 +105,7 @@ from little_penguins;
 
 ## Cортировка результатов запроса
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/528cad2f89530cb59775b1d8ae00b4f2/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/528cad2f89530cb59775b1d8ae00b4f2/))
 
 ```sql
 select
@@ -142,7 +142,7 @@ order by island asc, sex desc;
 
 ## Ограничение результата запроса
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/7b9ec307409f3d84a132e00c0bff3908/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/7b9ec307409f3d84a132e00c0bff3908/))
 
 ```sql
 select
@@ -178,7 +178,7 @@ limit 10;
 
 ## Постраничный вывод (пагинация)
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/f223fa3e3a3eea42d51edd2e6c9ff915/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/f223fa3e3a3eea42d51edd2e6c9ff915/))
 
 ```sql
 select
@@ -210,7 +210,7 @@ limit 10 offset 3;
 
 ## Удаление дубликатов из результата запроса
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/31e1f865c5de14af77eca070cd985d63/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/31e1f865c5de14af77eca070cd985d63/))
 
 ```sql
 select distinct
@@ -249,7 +249,7 @@ from penguins;
 
 ## Фильтрация результатов запроса
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/ffbe246d8112c8c998b0d4b5cecee941/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/ffbe246d8112c8c998b0d4b5cecee941/))
 
 ```sql
 select distinct
@@ -282,7 +282,7 @@ SQLite будет принимать текстовые данные в двой
 
 ## Фильтрация с более сложными условиями
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/c99103b164cab302cf03bc976f9a6beb/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/c99103b164cab302cf03bc976f9a6beb/))
 
 ```sql
 select distinct
@@ -312,7 +312,7 @@ where island = 'Biscoe' and sex != 'MALE';
 
 ## Выполнение расчетов
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/5263669b94cf065f18343dcc33248739/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/5263669b94cf065f18343dcc33248739/))
 
 ```sql
 select
@@ -335,7 +335,7 @@ limit 3;
 
 ## Псевдонимы колонок
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/05bde8ecc4459418c669e0637deb290d/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/05bde8ecc4459418c669e0637deb290d/))
 
 ```sql
 select
@@ -373,7 +373,7 @@ limit 3;
 
 ## Вычисление с отсутствующими значениями
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/05bde8ecc4459418c669e0637deb290d/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/05bde8ecc4459418c669e0637deb290d/))
 
 ```sql
 select
@@ -403,7 +403,7 @@ limit 5;
 
 ### Сравнение с `null`
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/0c62d806cfb999a431d3c78b488d965d/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/0c62d806cfb999a431d3c78b488d965d/))
 
 - это повторили ранее
 
@@ -442,7 +442,7 @@ where island = 'Biscoe' and sex = 'FEMALE';
 | Gentoo  | FEMALE | Biscoe |
 ```
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/b77d9e619645f3562fe18b0bec573ed6/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/b77d9e619645f3562fe18b0bec573ed6/))
 
 - Но если мы спросим о пингвинах, не являющихся самками, их мы тоже получим
 
@@ -463,7 +463,7 @@ where island = 'Biscoe' and sex != 'FEMALE';
 
 ### Тернарная логика
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/f42a97eea4aabe84ac06069c2def564e/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/f42a97eea4aabe84ac06069c2def564e/))
 
 ```sql
 select null = null;
@@ -484,7 +484,7 @@ select null = null;
 
 ### Безопасная обработка `null` значений
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/9fcfbdccb6ba09efcdfba07940429a40/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/9fcfbdccb6ba09efcdfba07940429a40/))
 
 ```sql
  select
