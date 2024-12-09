@@ -19,7 +19,7 @@
 
 - [Загрузите базы данных SQLite, используемые в этих примерах.](https://github.com/lessonomicon/querynomicon/raw/main/querynomicon.zip)
 
-- Вклады очень приветствуются: пожалуйста, ознакомьтесь с [руководством для участников](https://lessonomicon.github.io/querynomicon/contributing.html), чтобы получить дополнительную информацию. Ознакомьтесь также с [условиями](https://lessonomicon.github.io/querynomicon/license/) использования нашей лицензии и обратите внимание, что все участники обязаны соблюдать наш Кодекс поведения.
+- Вклады очень приветствуются: пожалуйста, ознакомьтесь с [руководством для участников](https://lessonomicon.github.io/querynomicon/contributing.html), чтобы получить дополнительную информацию. Ознакомьтесь также с [условиями](https://lessonomicon.github.io/querynomicon/license.html) использования нашей лицензии и обратите внимание, что все участники обязаны соблюдать наш Кодекс поведения.
 
 ---
 
