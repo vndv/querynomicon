@@ -57,7 +57,7 @@
 ## Подключение к базе данных
 
 
- <img src="./assets/asset1.png" alt="Описание" style="max-width:100%; height:auto;">
+ <img src="./assets/asset1.jpeg" alt="Описание" style="max-width:100%; height:auto;">
 
 
 ```sql
