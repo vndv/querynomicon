@@ -781,3 +781,316 @@ create table work (
 - SQLite добавил несколько вещей
   - create if not exists
   - ключевые слова в верхнем регистре (SQL нечувствителен к регистру)
+
+
+### Вставка данных
+
+```sql
+insert into job values
+('calibrate', 1.5),
+('clean', 0.5);
+insert into work values
+('mik', 'calibrate'),
+('mik', 'clean'),
+('mik', 'complain'),
+('po', 'clean'),
+('po', 'complain'),
+('tay', 'complain');
+```
+
+|   name    | billable |
+|-----------|----------|
+| calibrate | 1.5      |
+| clean     | 0.5      |
+| person |    job    |
+|--------|-----------|
+| mik    | calibrate |
+| mik    | clean     |
+| mik    | complain  |
+| po     | clean     |
+| po     | complain  |
+| tay    | complain  |
+
+### Выполните следующие действия
+
+- Скачайте примеры
+- Зархивируйте файлы (UNZIP)
+- Для создания баз выподните следующие команды
+  - .read create_work_job.sql
+  - .read populate_work_job.sql
+
+
+#### Упражнение
+
+Используя базу данных в памяти, определите таблицу под названием «заметки» с двумя текстовыми столбцами «автор» и «заметка», а затем добавьте три или четыре строки. Используйте запрос, чтобы проверить, что заметки сохранены и что вы можете (например) выбрать их по имени автора.
+
+Что произойдет, если вы попытаетесь вставить в заметки слишком много или слишком мало значений? Что произойдет, если в поле примечания вместо строки вставить число?
+
+### Обновление записей
+
+```sql
+update work
+set person = 'tae'
+where person = 'tay';
+```
+
+| person |    job    |
+|--------|-----------|
+| mik    | calibrate |
+| mik    | clean     |
+| mik    | complain  |
+| po     | clean     |
+| po     | complain  |
+| tae    | complain  |
+
+> [!WARNING]
+
+> При обновлении записей в таблице всегда указывайте условие `where` в протоимвном случае вы обновите все записи в таблице
+
+
+### Удаление записей
+
+```sql
+delete from work
+where person = 'tae';
+```
+
+```sql
+select * from work;
+```
+
+| person |    job    |
+|--------|-----------|
+| mik    | calibrate |
+| mik    | clean     |
+| mik    | complain  |
+| po     | clean     |
+| po     | complain  |
+
+> [!WARNING]
+
+> И снова, при удалении записей в таблице всегда указывайте условие `where`
+
+#### Упражнение
+
+Что произойдет, если вы попытаетесь удалить несуществующие строки (например, все записи в работе, относящиеся к Джуне)?
+
+
+### Восстановление базы данных
+
+```sql
+create table backup (
+    person text not null,
+    job text not null
+);
+```
+
+```sql
+insert into backup
+select
+    person,
+    job
+from work
+where person = 'tae';
+```
+
+```sql
+delete from work
+where person = 'tae';
+```
+
+```sql
+select * from backup;
+```
+| person |   job    |
+|--------|----------|
+| tae    | complain |
+
+- Далее мы рассмотрим еще одну стратегию основанную на [tombstone](glossary.md#надгробный-камень-tombstone)
+
+#### Упражнение
+
+Сохранение и восстановление данных в виде текста:
+
+1. Воссоздайте таблицу примечаний в базе данных в памяти, а затем используйте команды SQLite .output и .dump, чтобы сохранить базу данных в файл с именем Notes.sql. Проверьте содержимое этого файла: как хранились ваши данные?
+
+2. Запустите новый сеанс SQLite и загрузите Notes.sql с помощью команды .read. Проверьте базу данных с помощью .schema и выберите *: все ли так, как вы ожидали?
+
+Сохранение и восстановление данных в двоичном формате:
+
+1. Снова создайте таблицу примечаний в базе данных в памяти и используйте команду SQLite .backup, чтобы сохранить ее в файл с именем Notes.db. Проверьте этот файл с помощью od -c Notes.db или текстового редактора, который может обрабатывать двоичные данные: как хранились ваши данные?
+
+2. Запустите новый сеанс SQLite и загрузите Notes.db с помощью команды .restore. Проверьте базу данных с помощью .schema и выберите *: все ли так, как вы ожидали?1.
+
+
+### Проверка знаний
+
+<img src="./assets/core_datamod_concept_map.svg" alt="Описание" style="max-width:100%; height:auto;">
+
+
+## Объединение информации
+
+```sql
+select *
+from work cross join job;
+```
+
+| person |    job    |   name    | billable |
+|--------|-----------|-----------|----------|
+| mik    | calibrate | calibrate | 1.5      |
+| mik    | calibrate | clean     | 0.5      |
+| mik    | clean     | calibrate | 1.5      |
+| mik    | clean     | clean     | 0.5      |
+| mik    | complain  | calibrate | 1.5      |
+| mik    | complain  | clean     | 0.5      |
+| po     | clean     | calibrate | 1.5      |
+| po     | clean     | clean     | 0.5      |
+| po     | complain  | calibrate | 1.5      |
+| po     | complain  | clean     | 0.5      |
+| tay    | complain  | calibrate | 1.5      |
+| tay    | complain  | clean     | 0.5      |
+
+- `JOIN` объединяет информацию из двух таблиц.
+
+- `cross join` создает перекрестное (или декартово) произведение
+- Все комбинации строк из каждой таблицы
+Результат не особенно полезен: значения задания и имени не совпадают.
+То есть в объединенных данных есть записи, части которых не связаны друг с другом.
+
+### Внутренний джоин
+
+```sql
+select *
+from work inner join job
+    on work.job = job.name;
+```
+
+| person |    job    |   name    | billable |
+|--------|-----------|-----------|----------|
+| mik    | calibrate | calibrate | 1.5      |
+| mik    | clean     | clean     | 0.5      |
+| po     | clean     | clean     | 0.5      |
+
+- Используйте обозначение table.column для указания столбцов.
+- Столбец может иметь то же имя, что и таблица.
+- Используйте `on` чтобы указать условие соединения таблиц.
+
+#### Упражнение
+
+Повторно запустите запрос, показанный выше, используя где job = name вместо полной записи table.name. Сокращенная форма легче или труднее читаться и с большей или меньшей вероятностью приведет к ошибкам?
+
+### Агрегирование объединенных данных
+
+```sql
+select
+    work.person,
+    sum(job.billable) as pay
+from work inner join job
+    on work.job = job.name
+group by work.person;
+```
+
+| person | pay |
+|--------|-----|
+| mik    | 2.0 |
+| po     | 0.5 |
+
+
+Объединяет идеи, которые мы видели раньше
+Но Тэй отсутствует в таблице
+В таблице должностей нет записей с именем Тэй
+Поэтому нет записей, которые нужно группировать и суммировать.
+
+### Левый джоин
+
+```sql
+select *
+from work left join job
+    on work.job = job.name;
+```
+
+| person |    job    |   name    | billable |
+|--------|-----------|-----------|----------|
+| mik    | calibrate | calibrate | 1.5      |
+| mik    | clean     | clean     | 0.5      |
+| mik    | complain  |           |          |
+| po     | clean     | clean     | 0.5      |
+| po     | complain  |           |          |
+| tay    | complain  |           |          |
+
+
+- Левое внешнее соединение сохраняет все строки из левой таблицы.
+- Заполняет недостающие значения из правой таблицы нулевым значением
+
+### Агрегированое левое соединений
+
+```sql
+select
+    work.person,
+    sum(job.billable) as pay
+from work left join job
+    on work.job = job.name
+group by work.person;
+```
+
+| person | pay |
+|--------|-----|
+| mik    | 2.0 |
+| po     | 0.5 |
+| tay    |     |
+
+- Так лучше, но нам бы хотелось видеть 0, а не пробел.
+
+### Объединение значений
+
+```sql
+select
+    work.person,
+    coalesce(sum(job.billable), 0.0) as pay
+from work left join job
+    on work.job = job.name
+group by work.person;
+```
+
+| person | pay |
+|--------|-----|
+| mik    | 2.0 |
+| po     | 0.5 |
+| tay    | 0.0 |
+
+- Coalesce(val1, val2, …) возвращает первое ненулевое значение
+
+### Полное внешнее соединение
+
+- Полное внешнее соединение — это объединение левого внешнего соединения и правого внешнего соединения.
+- Почти то же самое, что и перекрестное соединение, но учтите:
+
+```sql
+create table size (
+    s text not null
+);
+insert into size values ('light'), ('heavy');
+
+create table weight (
+    w text not null
+);
+```
+
+```sql
+select * from size full outer join weight;
+```
+
+|   s   | w |
+|-------|---|
+| light |   |
+| heavy |   |
+
+- Полное внешнее соединение приведет к пустому результату
+
+#### Упражнение
+
+Найдите наименьшее время, которое каждый человек потратил на любую работу. Ваши выходные данные должны показать, что mik и po потратили на какую-то работу по 0,5 часа каждый. Можете ли вы найти способ показать название задания, используя SQL, который вы видели до сих пор?
+
+### Проверка знаний
+
+<img src="./assets/core_join_concept_map.svg" alt="Описание" style="max-width:100%; height:auto;">
