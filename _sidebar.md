@@ -2,5 +2,6 @@
 * [Домой](/README.md)
 
 * [Введение](/resources/introduction.md)
-* [Основные функции](/resources/core_features.md)
+* [Основы SQL](/resources/core.md)
+* [Основные возможности SQL](/resources/core_features.md)
 * [Словарь терминов](/resources/glossary.md)
