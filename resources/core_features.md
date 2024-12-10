@@ -2,7 +2,7 @@
 
 ## Агрегация
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/d208c0b539b4be11345c3a2e6ed8f9d2/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/d208c0b539b4be11345c3a2e6ed8f9d2/))
 
 ```sql
 select
@@ -21,7 +21,7 @@ from penguins;
 
 ### Общие функции агрегирования
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/bcee1003096fc086d60954f2f6ad6a85/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/bcee1003096fc086d60954f2f6ad6a85/))
 
 ```sql
 select
@@ -45,7 +45,7 @@ from penguins;
 
 ### Подсчет
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/783908785044a5c9066acf9632e4ccc8/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/783908785044a5c9066acf9632e4ccc8/))
 
 ```sql
 select
@@ -70,7 +70,7 @@ from penguins;
 
 ### Группировка
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/d1a1b06d5abbd587add37331d645b00c/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/d1a1b06d5abbd587add37331d645b00c/))
 
 ```sql
 select 
@@ -93,7 +93,7 @@ group by sex;
 
 ### Поведение неагрегированных столбцов
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/23ec4ad50459f657b5ee0cfe5b3ce0af/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/23ec4ad50459f657b5ee0cfe5b3ce0af/))
 
 ```sql
 select
@@ -114,7 +114,7 @@ group by sex;
 
 ### Произвольный выбор при агрегировании
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/6b20be9d42a236102d074f219291470b/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/6b20be9d42a236102d074f219291470b/))
 
 ```sql
 select
@@ -145,7 +145,7 @@ group by sex;
 
 ### Фильтрация агрегированных значений
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/d2a2ad0c36bc566830a0e7a5e0a9065a/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/d2a2ad0c36bc566830a0e7a5e0a9065a/))
 
 ```sql
 select
@@ -172,7 +172,7 @@ having average_mass_g > 4000.0;
 
 ### Читаемый вывод
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/0533124bddd2a3ce1007cb55123ace29/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/0533124bddd2a3ce1007cb55123ace29/))
 
 ```sql
 select
@@ -193,7 +193,7 @@ having average_mass_g > 4000.0;
 
 ###  Фильтрация агрегируемых данных
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/b57970c1f981d1af69e177f418e20e30/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/b57970c1f981d1af69e177f418e20e30/))
 
 ```sql
 select
@@ -239,7 +239,7 @@ sqlite3 :memory:
 
 ### Создание таблиц
 
-([онлайн демо](https://sqlize.online/sql/sqlite3_data/22173e8fc5b77d40add8716b72690474/))
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/22173e8fc5b77d40add8716b72690474/))
 
 ```sql
 create table job (
@@ -263,23 +263,32 @@ create table work (
 
 ### Вставка данных
 
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/fc5132b1f8e993fd1eb0e46815a5f21b/))
+
 ```sql
 insert into job values
-('calibrate', 1.5),
-('clean', 0.5);
-insert into work values
-('mik', 'calibrate'),
-('mik', 'clean'),
-('mik', 'complain'),
-('po', 'clean'),
-('po', 'complain'),
-('tay', 'complain');
-```
+    ('calibrate', 1.5),
+    ('clean', 0.5);
 
+insert into work values
+    ('mik', 'calibrate'),
+    ('mik', 'clean'),
+    ('mik', 'complain'),
+    ('po', 'clean'),
+    ('po', 'complain'),
+    ('tay', 'complain');
+
+select * from job;
+
+select * from work;
+```
+```
 |   name    | billable |
 |-----------|----------|
 | calibrate | 1.5      |
 | clean     | 0.5      |
+
+
 | person |    job    |
 |--------|-----------|
 | mik    | calibrate |
@@ -288,6 +297,7 @@ insert into work values
 | po     | clean     |
 | po     | complain  |
 | tay    | complain  |
+```
 
 ### Выполните следующие действия
 
@@ -300,18 +310,19 @@ insert into work values
 
 #### Упражнение
 
-Используя базу данных в памяти, определите таблицу под названием «заметки» с двумя текстовыми столбцами «автор» и «заметка», а затем добавьте три или четыре строки. Используйте запрос, чтобы проверить, что заметки сохранены и что вы можете (например) выбрать их по имени автора.
-
-Что произойдет, если вы попытаетесь вставить в заметки слишком много или слишком мало значений? Что произойдет, если в поле примечания вместо строки вставить число?
+1. Используя базу данных в памяти, определите таблицу под названием «заметки» с двумя текстовыми столбцами «автор» и «заметка», а затем добавьте три или четыре строки. Используйте запрос, чтобы проверить, что заметки сохранены и что вы можете (например) выбрать их по имени автора.
+2. Что произойдет, если вы попытаетесь вставить в заметки слишком много или слишком мало значений? Что произойдет, если в поле примечания вместо строки вставить число?
 
 ### Обновление записей
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/bcb9b1af1af692f45d6003cd5257c911/))
 
 ```sql
 update work
 set person = 'tae'
 where person = 'tay';
 ```
-
+```
 | person |    job    |
 |--------|-----------|
 | mik    | calibrate |
@@ -320,23 +331,22 @@ where person = 'tay';
 | po     | clean     |
 | po     | complain  |
 | tae    | complain  |
+```
 
 > [!WARNING]
-
 > При обновлении записей в таблице всегда указывайте условие `where` в протоимвном случае вы обновите все записи в таблице
 
-
 ### Удаление записей
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/66972881c02215d277100da1ec9e2e69/))
 
 ```sql
 delete from work
 where person = 'tae';
-```
 
-```sql
 select * from work;
 ```
-
+```
 | person |    job    |
 |--------|-----------|
 | mik    | calibrate |
@@ -344,14 +354,14 @@ select * from work;
 | mik    | complain  |
 | po     | clean     |
 | po     | complain  |
+```
 
 > [!WARNING]
-
 > И снова, при удалении записей в таблице всегда указывайте условие `where`
 
 #### Упражнение
 
-Что произойдет, если вы попытаетесь удалить несуществующие строки (например, все записи в работе, относящиеся к Джуне)?
+1. Что произойдет, если вы попытаетесь удалить несуществующие строки (например, все записи в работе, относящиеся к Джуне)?
 
 
 ### Восстановление базы данных
@@ -361,28 +371,24 @@ create table backup (
     person text not null,
     job text not null
 );
-```
 
-```sql
 insert into backup
 select
     person,
     job
 from work
 where person = 'tae';
-```
 
-```sql
 delete from work
 where person = 'tae';
-```
 
-```sql
 select * from backup;
+```
 ```
 | person |   job    |
 |--------|----------|
 | tae    | complain |
+```
 
 - Далее мы рассмотрим еще одну стратегию основанную на [tombstone](glossary.md#надгробный-камень-tombstone)
 
@@ -391,15 +397,12 @@ select * from backup;
 Сохранение и восстановление данных в виде текста:
 
 1. Воссоздайте таблицу примечаний в базе данных в памяти, а затем используйте команды SQLite .output и .dump, чтобы сохранить базу данных в файл с именем Notes.sql. Проверьте содержимое этого файла: как хранились ваши данные?
-
 2. Запустите новый сеанс SQLite и загрузите Notes.sql с помощью команды .read. Проверьте базу данных с помощью .schema и выберите *: все ли так, как вы ожидали?
 
 Сохранение и восстановление данных в двоичном формате:
 
 1. Снова создайте таблицу примечаний в базе данных в памяти и используйте команду SQLite .backup, чтобы сохранить ее в файл с именем Notes.db. Проверьте этот файл с помощью od -c Notes.db или текстового редактора, который может обрабатывать двоичные данные: как хранились ваши данные?
-
 2. Запустите новый сеанс SQLite и загрузите Notes.db с помощью команды .restore. Проверьте базу данных с помощью .schema и выберите *: все ли так, как вы ожидали?1.
-
 
 ### Проверка знаний
 
@@ -410,9 +413,10 @@ select * from backup;
 
 ```sql
 select *
-from work cross join job;
+from work 
+cross join job;
 ```
-
+```
 | person |    job    |   name    | billable |
 |--------|-----------|-----------|----------|
 | mik    | calibrate | calibrate | 1.5      |
@@ -427,35 +431,37 @@ from work cross join job;
 | po     | complain  | clean     | 0.5      |
 | tay    | complain  | calibrate | 1.5      |
 | tay    | complain  | clean     | 0.5      |
+```
 
-- `JOIN` объединяет информацию из двух таблиц.
+- `join` объединяет информацию из двух таблиц.
+- `cross join` создает перекрестное (или декартово) произведение - все комбинации строк из каждой таблицы.
 
-- `cross join` создает перекрестное (или декартово) произведение
-- Все комбинации строк из каждой таблицы
-Результат не особенно полезен: значения задания и имени не совпадают.
-То есть в объединенных данных есть записи, части которых не связаны друг с другом.
+В данном случае результат не особенно полезен: значения задания и имени не совпадают, то есть в объединенных данных есть записи, части которых не связаны друг с другом.
+*Но это не значит что `cross join` бесполезен всегда. Есть ситуации когда он единственное решение*
 
 ### Внутренний джоин
 
 ```sql
 select *
-from work inner join job
+from work 
+inner join job
     on work.job = job.name;
 ```
-
+```
 | person |    job    |   name    | billable |
 |--------|-----------|-----------|----------|
 | mik    | calibrate | calibrate | 1.5      |
 | mik    | clean     | clean     | 0.5      |
 | po     | clean     | clean     | 0.5      |
+```
 
-- Используйте обозначение table.column для указания столбцов.
+- Используйте обозначение `table.column` для указания столбцов.
 - Столбец может иметь то же имя, что и таблица.
 - Используйте `on` чтобы указать условие соединения таблиц.
 
 #### Упражнение
 
-Повторно запустите запрос, показанный выше, используя где job = name вместо полной записи table.name. Сокращенная форма легче или труднее читаться и с большей или меньшей вероятностью приведет к ошибкам?
+1. Повторно запустите запрос, показанный выше, используя где job = name вместо полной записи table.name. Сокращенная форма легче или труднее читаться и с большей или меньшей вероятностью приведет к ошибкам?
 
 ### Агрегирование объединенных данных
 
@@ -463,39 +469,39 @@ from work inner join job
 select
     work.person,
     sum(job.billable) as pay
-from work inner join job
+from work 
+inner join job
     on work.job = job.name
 group by work.person;
 ```
-
+```
 | person | pay |
 |--------|-----|
 | mik    | 2.0 |
 | po     | 0.5 |
+```
 
-
-Объединяет идеи, которые мы видели раньше
-Но Тэй отсутствует в таблице
-В таблице должностей нет записей с именем Тэй
-Поэтому нет записей, которые нужно группировать и суммировать.
+- Этот пример объединяет идеи, которые мы видели раньше.
+- Но tay отсутствует в результирующей таблице. В таблице должностей нет записей с именем tay, поэтому нет записей, которые нужно группировать и суммировать.
 
 ### Левый джоин
 
 ```sql
 select *
-from work left join job
+from work 
+left join job
     on work.job = job.name;
 ```
-
+```
 | person |    job    |   name    | billable |
 |--------|-----------|-----------|----------|
 | mik    | calibrate | calibrate | 1.5      |
 | mik    | clean     | clean     | 0.5      |
-| mik    | complain  |           |          |
+| mik    | complain  | [null]    | [null]   |
 | po     | clean     | clean     | 0.5      |
-| po     | complain  |           |          |
-| tay    | complain  |           |          |
-
+| po     | complain  | [null]    | [null]   |
+| tay    | complain  | [null]    | [null]   |
+```
 
 - Левое внешнее соединение сохраняет все строки из левой таблицы.
 - Заполняет недостающие значения из правой таблицы нулевым значением
@@ -506,18 +512,19 @@ from work left join job
 select
     work.person,
     sum(job.billable) as pay
-from work left join job
+from work 
+left join job
     on work.job = job.name
 group by work.person;
 ```
 
-| person | pay |
-|--------|-----|
-| mik    | 2.0 |
-| po     | 0.5 |
-| tay    |     |
+| person | pay    |
+|--------|--------|
+| mik    | 2.0    |
+| po     | 0.5    |
+| tay    | [null] |
 
-- Так лучше, но нам бы хотелось видеть 0, а не пробел.
+- Так лучше, но нам бы хотелось видеть 0, а не `null`.
 
 ### Объединение значений
 
@@ -525,18 +532,20 @@ group by work.person;
 select
     work.person,
     coalesce(sum(job.billable), 0.0) as pay
-from work left join job
+from work 
+left join job
     on work.job = job.name
 group by work.person;
 ```
-
+```
 | person | pay |
 |--------|-----|
 | mik    | 2.0 |
 | po     | 0.5 |
 | tay    | 0.0 |
+```
 
-- Coalesce(val1, val2, …) возвращает первое ненулевое значение
+- coalesce(val1, val2, …) возвращает первое непустое (не `null`) значение
 
 ### Полное внешнее соединение
 
@@ -552,22 +561,23 @@ insert into size values ('light'), ('heavy');
 create table weight (
     w text not null
 );
-```
 
-```sql
-select * from size full outer join weight;
+select * 
+from size 
+full outer join weight;
 ```
-
+```
 |   s   | w |
 |-------|---|
 | light |   |
 | heavy |   |
+```
 
 - Полное внешнее соединение приведет к пустому результату
 
 #### Упражнение
 
-Найдите наименьшее время, которое каждый человек потратил на любую работу. Ваши выходные данные должны показать, что mik и po потратили на какую-то работу по 0,5 часа каждый. Можете ли вы найти способ показать название задания, используя SQL, который вы видели до сих пор?
+1. Найдите наименьшее время, которое каждый человек потратил на любую работу. Ваши выходные данные должны показать, что mik и po потратили на какую-то работу по 0,5 часа каждый. Можете ли вы найти способ показать название задания, используя SQL, который вы видели до сих пор?
 
 ### Проверка знаний
 
