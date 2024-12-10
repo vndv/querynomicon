@@ -6,3 +6,4 @@
 * [Основные возможности SQL](/resources/core_features.md)
 * [Инструменты](/resources/tools.md)
 * [Словарь терминов](/resources/glossary.md)
+* [Контрибьюторы](/resources/contributors.md)
