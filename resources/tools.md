@@ -30,7 +30,7 @@ where job != 'Калибровка';
 ```sql
 select *
 from work
-where person not in ('Иван', 'Евгений');
+where person not in ('Иван', 'Слава');
 ```
 ```
 | person | job        |
