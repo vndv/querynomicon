@@ -65,14 +65,16 @@ where person not in (
 
 ### Первичный ключ (primary key)
 
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/fdc77f8d8b8c45b4275a88250491f395/))
+
 1. Можно использовать любое поле (или комбинацию полей) в таблице в качестве первичного ключа, если значения уникальны для каждой записи.
 2. Уникально идентифицирует конкретную запись в конкретной таблице.
 
 ```sql
 create table lab_equipment (
-    size real not null,
+    size  decimal not null,
     color text not null,
-    num integer not null,
+    num   integer not null,
     primary key (size, color)
 );
 
@@ -82,9 +84,6 @@ insert into lab_equipment values
     (2.5, 'blue', 1);
 
 select * from lab_equipment;
-
-insert into lab_equipment values
-    (1.5, 'green', 2);
 ```
 ```
 | size | color | num |
@@ -92,8 +91,14 @@ insert into lab_equipment values
 | 1.5  | blue  | 2   |
 | 1.5  | green | 1   |
 | 2.5  | blue  | 1   |
+```
+```sql
+insert into lab_equipment values
+    (1.5, 'green', 2);
+```
 
-Runtime error near line 17: UNIQUE constraint failed: lab_equipment.size, lab_equipment.color (19)
+```
+**UNIQUE constraint failed: lab_equipment.size, lab_equipment.color**
 ```
 
 #### Упражнения
@@ -102,6 +107,8 @@ Runtime error near line 17: UNIQUE constraint failed: lab_equipment.size, lab_eq
 
 
 ### Автоинкремент и первичные ключи
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/44784ebcf722e3a8de6c89f58db7a88a/))
 
 ```sql
 create table person (
@@ -115,8 +122,6 @@ insert into person values
     (null, 'Слава');
 
 select * from person;
-
-insert into person values (1, 'prevented');
 ```
 ```
 | ident | name    |
@@ -124,8 +129,12 @@ insert into person values (1, 'prevented');
 | 1     | Иван    |
 | 2     | Евгений |
 | 3     | Слава   |
-
-Runtime error near line 12: UNIQUE constraint failed: person.ident (19)
+```
+```sql
+insert into person values (1, 'prevented');
+```
+```
+**UNIQUE constraint failed: person.ident**
 ```
 1. Автоинкремент автоматически увеличивается для каждой вставленной записи
 2. Обычно это поле используется в качестве первичного ключа, уникального для каждой записи.
