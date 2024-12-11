@@ -14,9 +14,10 @@ insert into new_work
 select
     person.ident as person_id,
     job.ident as job_id
-from
-    (person inner join work on person.name = work.person)
-    inner join job on job.name = work.job;
+from person 
+inner join work on person.name = work.person
+inner join job on job.name = work.job;
+
 select * from new_work;
 ```
 ```
@@ -33,18 +34,21 @@ select * from new_work;
 
 ```sql
 drop table work;
+
 alter table new_work rename to work;
-CREATE TABLE job (
+
+create table job (
     ident integer primary key autoincrement,
     name text not null,
     billable real not null
 );
-CREATE TABLE sqlite_sequence(name,seq);
-CREATE TABLE person (
+
+create table person (
     ident integer primary key autoincrement,
     name text not null
 );
-CREATE TABLE IF NOT EXISTS "work" (
+
+create table IF NOT EXISTS "work" (
     person_id integer not null,
     job_id integer not null,
     foreign key(person_id) references person(ident),
