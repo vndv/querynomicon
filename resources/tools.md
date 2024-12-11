@@ -71,18 +71,23 @@ where person not in (
 2. Уникально идентифицирует конкретную запись в конкретной таблице.
 
 ```sql
+-- создаём таблицу
 create table lab_equipment (
+    -- определяем поля
     size  decimal not null,
     color text not null,
     num   integer not null,
+    -- создаём первичный ключ на основе полей size и color
     primary key (size, color)
 );
 
+-- вставляем записи в таблицу
 insert into lab_equipment values
     (1.5, 'blue', 2),
     (1.5, 'green', 1),
     (2.5, 'blue', 1);
 
+-- проверяем результат
 select * from lab_equipment;
 ```
 ```
@@ -93,12 +98,15 @@ select * from lab_equipment;
 | 2.5  | blue  | 1   |
 ```
 ```sql
+-- пробуем вставить запись со значением первичного ключа уже существующего в таблице
 insert into lab_equipment values
     (1.5, 'green', 2);
 ```
 
+Закономерно получаем ошибку!
+
 ```
-**UNIQUE constraint failed: lab_equipment.size, lab_equipment.color**
+UNIQUE constraint failed: lab_equipment.size, lab_equipment.color
 ```
 
 #### Упражнения
@@ -111,18 +119,22 @@ insert into lab_equipment values
 ([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/44784ebcf722e3a8de6c89f58db7a88a/))
 
 ```sql
+-- создаём таблицу
 create table person (
-    ident integer primary key autoincrement,
+    ident integer primary key autoincrement, -- определяем поле как первичный ключ и автоинкремент
     name text not null
 );
 
+-- вставляем записи в таблицу
 insert into person values
     (null, 'Иван'),
     (null, 'Евгений'),
     (null, 'Слава');
 
+-- проверяем результат
 select * from person;
 ```
+Поле ident автоматически получает инкрементальные значения
 ```
 | ident | name    |
 |-------|---------|
@@ -131,10 +143,12 @@ select * from person;
 | 3     | Слава   |
 ```
 ```sql
+-- пробуем вставить запись с уже существующим значением инкремента
 insert into person values (1, 'prevented');
 ```
+И снова получаем ошибку!
 ```
-**UNIQUE constraint failed: person.ident**
+UNIQUE constraint failed: person.ident
 ```
 1. Автоинкремент автоматически увеличивается для каждой вставленной записи
 2. Обычно это поле используется в качестве первичного ключа, уникального для каждой записи.
@@ -162,9 +176,11 @@ select * from sqlite_sequence;
 ### Изменение таблиц
 
 ```sql
+-- добавляем колонку к таблице  
 alter table job
-add ident integer not null default -1;
+add ident integer not null default -1; -- не пустая, знечение по умолчанию -1 
 
+-- обновляем данные в таблице
 update job
 set ident = 1
 where name = 'Калибровка';
@@ -173,6 +189,7 @@ update job
 set ident = 2
 where name = 'Очистка';
 
+-- проверяем результат
 select * from job;
 ```
 ```
