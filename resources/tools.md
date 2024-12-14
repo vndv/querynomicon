@@ -131,6 +131,80 @@ limit 5;
 Используйте подзапрос, чтобы найти количество пингвинов, которые весят столько же, сколько самый легкий пингвин того же пола и вида.
 
 
+### Вхождение и Коррелированные подзапросы
+
+```sql
+select
+    name,
+    building
+from department
+where
+    exists (
+        select 1
+        from staff
+        where dept = department.ident
+    )
+order by name;
+```
+```
+|       name        |     building     |
+|-------------------|------------------|
+| Genetics          | Chesson          |
+| Histology         | Fashet Extension |
+| Molecular Biology | Chesson          |
+```
+
+1. Эндокринология отсутствует в списке.
+2. `select 1` в равной степени может быть выбрано `true` или любое другое значение
+3. Коррелированный подзапрос зависит от значения из внешнего запроса.
+ - Эквивалент вложенного цикла
+
+ ### Невхождение
+
+```sql
+ select
+    name,
+    building
+from department
+where
+    not exists (
+        select 1
+        from staff
+        where dept = department.ident
+    )
+order by name;
+```
+```
+|     name      | building |
+|---------------|----------|
+| Endocrinology | TGVH     |
+```
+
+#### Упражнение
+
+Можете ли вы переписать предыдущий запрос, используя исключение? Если да, то легче ли понять ваш новый запрос? Если запрос нельзя переписать, почему бы и нет?
+
+### Как избежать коррелирующих подзапросов
+
+```sql
+select distinct
+    department.name as name,
+    department.building as building
+from department inner join staff
+    on department.ident = staff.dept
+order by name;
+```
+```
+|       name        |     building     |
+|-------------------|------------------|
+| Genetics          | Chesson          |
+| Histology         | Fashet Extension |
+| Molecular Biology | Chesson          |
+```
+
+1. Соединение может быть быстрее, а может и нет чем коррелированный подзапрос.
+
+
 ## Общие табличные выражения  (Common Table Expression, CTE)
 
 ```sql
@@ -164,7 +238,184 @@ limit 5;
 2. Вложенные подзапросы быстро становятся трудными для понимания.
 3. База данных решает, как оптимизировать запрос
 
-### Объяснение планов запросов
+
+## Оконные функции
+
+```sql
+with ym_num as (
+    select
+        strftime('%Y-%m', started) as ym,
+        count(*) as num
+    from experiment
+    group by ym
+)
+
+select
+    ym,
+    num,
+    sum(num) over (order by ym) as num_done,
+    (sum(num) over (order by ym) * 1.00) / (select sum(num) from ym_num) as completed_progress, 
+    cume_dist() over (order by ym) as linear_progress
+from ym_num
+order by ym;
+```
+```
+|   ym    | num | num_done | completed_progress |  linear_progress   |
+|---------|-----|----------|--------------------|--------------------|
+| 2023-01 | 2   | 2        | 0.04               | 0.0769230769230769 |
+| 2023-02 | 5   | 7        | 0.14               | 0.153846153846154  |
+| 2023-03 | 5   | 12       | 0.24               | 0.230769230769231  |
+| 2023-04 | 1   | 13       | 0.26               | 0.307692307692308  |
+| 2023-05 | 6   | 19       | 0.38               | 0.384615384615385  |
+| 2023-06 | 5   | 24       | 0.48               | 0.461538461538462  |
+| 2023-07 | 3   | 27       | 0.54               | 0.538461538461538  |
+| 2023-08 | 2   | 29       | 0.58               | 0.615384615384615  |
+| 2023-09 | 4   | 33       | 0.66               | 0.692307692307692  |
+| 2023-10 | 6   | 39       | 0.78               | 0.769230769230769  |
+| 2023-12 | 4   | 43       | 0.86               | 0.846153846153846  |
+| 2024-01 | 5   | 48       | 0.96               | 0.923076923076923  |
+| 2024-02 | 2   | 50       | 1.0                | 1.0                |
+```
+
+1. `sum()` выполняет промежуточный итог
+2. `cume_dist()` — это доля просмотренных на данный момент строк.
+3. Итак, столбец num_done — это количество проведенных экспериментов…
+4. Completed_progress — это доля выполненных экспериментов…
+5. а Linear_progress — это доля пройденного времени.
+
+### Опережение и отставание (LEAD and LAG)
+
+```sql
+with ym_num as (
+    select
+        strftime('%Y-%m', started) as ym,
+        count(*) as num
+    from experiment
+    group by ym
+)
+
+select
+    ym,
+    lag(num) over (order by ym) as prev_num,
+    num,
+    lead(num) over (order by ym) as next_num
+from ym_num
+order by ym;
+```
+```
+|   ym    | prev_num | num | next_num |
+|---------|----------|-----|----------|
+| 2023-01 |          | 2   | 5        |
+| 2023-02 | 2        | 5   | 5        |
+| 2023-03 | 5        | 5   | 1        |
+| 2023-04 | 5        | 1   | 6        |
+| 2023-05 | 1        | 6   | 5        |
+| 2023-06 | 6        | 5   | 3        |
+| 2023-07 | 5        | 3   | 2        |
+| 2023-08 | 3        | 2   | 4        |
+| 2023-09 | 2        | 4   | 6        |
+| 2023-10 | 4        | 6   | 4        |
+| 2023-12 | 6        | 4   | 5        |
+| 2024-01 | 4        | 5   | 2        |
+| 2024-02 | 5        | 2   |          |
+```
+
+1. Используйте strftime для извлечения года и месяца
+2. Обработка даты/времени не является сильной стороной SQLite.
+3. Используйте оконные функции `lead` и `lag` для смещения значений.
+4. Недоступные значения вверху или внизу равны `null`.
+
+### Границ (Boundaries)
+
+1. Документация по оконным функциям SQLite описывает три типа фреймов и пять видов границ фреймов.
+2. Каждый тип нужно использовать по ситуации
+
+### Партицированые Окна (Partitioned Windows)
+
+```sql
+with y_m_num as (
+    select
+        strftime('%Y', started) as year,
+        strftime('%m', started) as month,
+        count(*) as num
+    from experiment
+    group by year, month
+)
+
+select
+    year,
+    month,
+    num,
+    sum(num) over (partition by year order by month) as num_done
+from y_m_num
+order by year, month;
+```
+```
+| year | month | num | num_done |
+|------|-------|-----|----------|
+| 2023 | 01    | 2   | 2        |
+| 2023 | 02    | 5   | 7        |
+| 2023 | 03    | 5   | 12       |
+| 2023 | 04    | 1   | 13       |
+| 2023 | 05    | 6   | 19       |
+| 2023 | 06    | 5   | 24       |
+| 2023 | 07    | 3   | 27       |
+| 2023 | 08    | 2   | 29       |
+| 2023 | 09    | 4   | 33       |
+| 2023 | 10    | 6   | 39       |
+| 2023 | 12    | 4   | 43       |
+| 2024 | 01    | 5   | 5        |
+| 2024 | 02    | 2   | 7        |
+```
+
+1. Партиции создаются по группам
+2. Таким образом, эксперименты начинаются с начала каждого года.
+
+#### Упражнение 
+
+Создайте запрос, который:
+1. Находит уникальный вес пингвинов в базе данных `penguins`;
+2. Отсортируйте их 
+3. Найдите разницу между каждым последующим отдельным весом
+4. Подсчитайте, сколько раз появляется каждое уникальное различие.
+
+### Объяснение плана запроса
+
+```sql
+explain query plan
+with ym_num as (
+    select
+        strftime('%Y-%m', started) as ym,
+        count(*) as num
+    from experiment
+    group by ym
+)
+select
+    ym,
+    num,
+    sum(num) over (order by ym) as num_done,
+    cume_dist() over (order by ym) as progress
+from ym_num
+order by ym;
+```
+```
+QUERY PLAN
+|--CO-ROUTINE (subquery-3)
+|  |--CO-ROUTINE (subquery-4)
+|  |  |--CO-ROUTINE ym_num
+|  |  |  |--SCAN experiment
+|  |  |  `--USE TEMP B-TREE FOR GROUP BY
+|  |  |--SCAN ym_num
+|  |  `--USE TEMP B-TREE FOR ORDER BY
+|  `--SCAN (subquery-4)
+`--SCAN (subquery-3)
+```
+
+- Становится полезным… в конце концов
+
+
+
+### Объяснение другого плана запроса
 
 ```sql
 explain query plan
