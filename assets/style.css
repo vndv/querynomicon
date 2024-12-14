@@ -39,7 +39,9 @@
     border-right: 1px solid #dee2e7;
     overflow-y: auto;
     top: 0;
+    
 }
+
 
 .sidebar>.app-name {
     display: -webkit-box;
