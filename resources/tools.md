@@ -164,7 +164,7 @@ limit 5;
 2. Вложенные подзапросы быстро становятся трудными для понимания.
 3. База данных решает, как оптимизировать запрос
 
-## Объяснение планов запросов
+### Объяснение планов запросов
 
 ```sql
 explain query plan
@@ -186,7 +186,7 @@ QUERY PLAN
 #### Упражнение 
 Используйте подзапрос, чтобы найти количество пингвинов, которые весят столько же, сколько самый легкий пингвин того же пола и вида.
 
-## Перечисление строк
+### Перечисление строк
 
 - В каждой таблице есть специальный столбец, называемый `rowid`.
 
@@ -218,3 +218,354 @@ limit 5;
 
 1. Предположим, вы создаете новую таблицу, добавляете три строки, удаляете эти строки и снова добавляете те же значения. Ожидаете ли вы, что идентификаторы последних строк будут 1–3 или 4–6?
 2. Используя базу данных в памяти, выполните действия, описанные в части 1. Был ли результат ожидаемым?
+
+### Условия
+
+```sql
+with sized_penguins as (
+    select
+        species,
+        iif(
+            body_mass_g < 3500,
+            'small',
+            'large'
+        ) as size
+    from penguins
+    where body_mass_g is not null
+)
+
+select
+    species,
+    size,
+    count(*) as num
+from sized_penguins
+group by species, size
+order by species, num;
+```
+```
+|  species  | size  | num |
+|-----------|-------|-----|
+| Adelie    | small | 54  |
+| Adelie    | large | 97  |
+| Chinstrap | small | 17  |
+| Chinstrap | large | 51  |
+| Gentoo    | large | 123 |
+```
+
+1. iif(condition, true_result, false_result)
+  - **Примечание**: iif с двумя i
+2. Может показаться странным думать об if/else как о функции, но это часто встречается в векторизованных вычислениях.
+
+#### Упражнение
+
+
+Как изменится результат предыдущего запроса, если убрать проверку на нулевую массу тела? Почему результат без этой проверки вводит в заблуждение?
+
+Что дает каждое из приведенных ниже выражений? Как вы думаете, какие из них на самом деле пытаются разделить на ноль?
+
+1. `iif(0, 123, 1/0)`
+2. `iif(1, 123, 1/0)`
+3. `iif(0, 1/0, 123)`
+4. `iif(1, 1/0, 123)`
+
+### Работа с CASE WHEN
+
+- Что, если нам нужны маленькие, средние и большие пингвины?
+- Условие `CASE` может вкладываться в `iif`, но быстро становится нечитаемым
+
+```sql
+with sized_penguins as (
+    select
+        species,
+        case
+            when body_mass_g < 3500 then 'small'
+            when body_mass_g < 5000 then 'medium'
+            else 'large'
+        end as size
+    from penguins
+    where body_mass_g is not null
+)
+
+select
+    species,
+    size,
+    count(*) as num
+from sized_penguins
+group by species, size
+order by species, num;
+```
+```
+|  species  |  size  | num |
+|-----------|--------|-----|
+| Adelie    | small  | 54  |
+| Adelie    | medium | 97  |
+| Chinstrap | small  | 17  |
+| Chinstrap | medium | 51  |
+| Gentoo    | medium | 56  |
+| Gentoo    | large  | 67  |
+```
+
+1. Сравнивает условия и выбирает первое подходящее
+2. Результат `CASE` равен нулю, если ни одно условие не истинно
+3. Используйте `else` в случае поумолчанию
+
+#### Упражнения
+
+Измените приведенный выше запрос так, чтобы выходные данные были «пингвин маленький» и «пингвин большой», объединив строку «пингвин есть» со всем регистром, а не с отдельными ответвлениями. (Это упражнение показывает, что `CASE/WHEN` является выражением, а не утверждением.)
+
+### Проверка диапазона
+
+```sql
+with sized_penguins as (
+    select
+        species,
+        case
+            when body_mass_g between 3500 and 5000 then 'normal'
+            else 'abnormal'
+        end as size
+    from penguins
+    where body_mass_g is not null
+)
+
+select
+    species,
+    size,
+    count(*) as num
+from sized_penguins
+group by species, size
+order by species, num;
+```
+```
+|  species  |   size   | num |
+|-----------|----------|-----|
+| Adelie    | abnormal | 54  |
+| Adelie    | normal   | 97  |
+| Chinstrap | abnormal | 17  |
+| Chinstrap | normal   | 51  |
+| Gentoo    | abnormal | 61  |
+| Gentoo    | normal   | 62  |
+```
+
+1. `BETWEEN` может облегчить чтение запросов
+2. Будьте внимательны с когда указываете диапазон в `BETWEEN`
+
+#### Упражнения
+
+Выражение val между «A» и «Z» истинно, если val равно «M» (верхний регистр), но ложно, если val равно «m» (нижний регистр). Перепишите выражение, используя встроенные скалярные функции SQLite, чтобы оно было истинным в обоих случаях.
+
+
+
+|**name**	|**purpose**|
+|-----------|-----------|
+|substr	    |Get substring given starting point and length
+|trim	    |Remove characters from beginning and end of string
+|ltrim	    |Remove characters from beginning of string
+|rtrim	    |Remove characters from end of string
+|length	    |Length of string
+|replace    |Replace occurrences of substring with another string
+|upper	    |Return upper-case version of string
+|lower	    |Return lower-case version of string
+|instr	    |Find location of first occurrence of substring (returns 0 if not found)
+
+
+## Еще одна база данных
+
+1. Диаграмма сущность-связь (диаграмма ER) показывает связи между таблицами.
+2. Как и все, что связано с базами данных, существует множество вариаций связи таблиц.
+
+
+<img src="./assets/tools_assays_tables.svg" alt="Описание" style="max-width:100%; height:auto;">
+
+```sql
+select * from staff;
+```
+```
+| ident | personal |  family   | dept | age |
+|-------|----------|-----------|------|-----|
+| 1     | Kartik   | Gupta     |      | 46  |
+| 2     | Divit    | Dhaliwal  | hist | 34  |
+| 3     | Indrans  | Sridhar   | mb   | 47  |
+| 4     | Pranay   | Khanna    | mb   | 51  |
+| 5     | Riaan    | Dua       |      | 23  |
+| 6     | Vedika   | Rout      | hist | 45  |
+| 7     | Abram    | Chokshi   | gen  | 23  |
+| 8     | Romil    | Kapoor    | hist | 38  |
+| 9     | Ishaan   | Ramaswamy | mb   | 35  |
+| 10    | Nitya    | Lal       | gen  | 52  |
+```
+
+#### Упражнение
+
+Нарисуйте табличную диаграмму и диаграмму ER, чтобы представить следующую базу данных:
+
+1. person есть `id` и `full_name`
+2. course есть `id` и `name`
+3. section есть `course_id`, `start_date`, и `end_date`
+4. instructor есть `person_id` и `section_id`
+5. student есть `person_id`, `section_id`, и `status`
+
+### Сопоставление с образцом
+
+```sql
+select
+    personal,
+    family
+from staff
+where personal like '%ya%';
+```
+```
+| personal | family |
+|----------|--------|
+| Nitya    | Lal    |
+```
+
+1. `like` это исходное средство сопоставления шаблонов SQL
+2. `%` соответствует нулю или более символам в начале или конце строки
+3. По умолчанию нечувствителен к регистру
+4. `glob` поддерживает подстановочные знаки в стиле Unix
+
+#### Упражнение
+
+Перепишите показанный выше запрос на сопоставление шаблонов, используя `glob`.
+
+
+### Выбор первой и последней строк
+
+```sql
+select * from (
+    select * from (select * from experiment order by started asc limit 5)
+    union all
+    select * from (select * from experiment order by started desc limit 5)
+)
+order by started asc;
+```
+```
+| ident |    kind     |  started   |   ended    |
+|-------|-------------|------------|------------|
+| 17    | trial       | 2023-01-29 | 2023-01-30 |
+| 35    | calibration | 2023-01-30 | 2023-01-30 |
+| 36    | trial       | 2023-02-02 | 2023-02-03 |
+| 25    | trial       | 2023-02-12 | 2023-02-14 |
+| 2     | calibration | 2023-02-14 | 2023-02-14 |
+| 40    | calibration | 2024-01-21 | 2024-01-21 |
+| 12    | trial       | 2024-01-26 | 2024-01-28 |
+| 44    | trial       | 2024-01-27 | 2024-01-29 |
+| 34    | trial       | 2024-02-01 | 2024-02-02 |
+| 14    | calibration | 2024-02-03 | 2024-02-03 |
+```
+
+1. `union all` объединяет строки
+2. Сохраняет дубликаты: `union` само по себе сохраняет только уникальные записи.
+
+#### Упражнение
+
+Напишите запрос, результат которого включает две строки для каждого пингвина Адели в базе данных пингвинов. Как вы можете проверить, что ваш запрос работает правильно?
+
+### Пересечение
+
+```sql
+select
+    personal,
+    family,
+    dept,
+    age
+from staff
+where dept = 'mb'
+intersect
+select
+    personal,
+    family,
+    dept,
+    age from staff
+where age < 50;
+```
+```
+| personal |  family   | dept | age |
+|----------|-----------|------|-----|
+| Indrans  | Sridhar   | mb   | 47  |
+| Ishaan   | Ramaswamy | mb   | 35  |
+```
+
+1. Используемые строки должны иметь одинаковую структуру.
+2. Пересечение обычно используется при получении значений из разных источников.
+3. В приведенном выше запросе было бы понятнее использовать, `where`
+
+#### Упражнение
+
+Используйте пересечение, чтобы найти всех пингвинов Адели весом более 4000 граммов. Как вы можете проверить, что ваш запрос работает правильно?
+
+Используйте план запроса(`explain`) , чтобы сравнить только что написанный запрос на основе пересечения с запросом, в котором используется ключевое слово `where`. Какой запрос выглядит более эффективным? Почему вы этому верите?
+
+### Исключение
+
+```sql
+select
+    personal,
+    family,
+    dept,
+    age
+from staff
+where dept = 'mb'
+except
+    select
+        personal,
+        family,
+        dept,
+        age from staff
+    where age < 50;
+```
+```
+| personal | family | dept | age |
+|----------|--------|------|-----|
+| Pranay   | Khanna | mb   | 51  |
+```
+
+1. Опять же, таблицы должны иметь одинаковую структуру.
+2. Было бы понятнее написать запрос с `where`
+3. SQL работает с множествами, а не с таблицами, за исключением тех случаев, когда это не так.
+
+#### Упражнение
+
+Используйте «исключение», чтобы найти всех пингвинов Gentoo, кроме самцов. Как вы можете проверить, что ваш запрос работает правильно?
+
+### Случайные числа
+
+```sql
+with decorated as (
+    select random() as rand,
+    personal || ' ' || family as name
+    from staff
+)
+
+select
+    rand,
+    abs(rand) % 10 as selector,
+    name
+from decorated
+where selector < 5;
+```
+```
+|         rand         | selector |      name       |
+|----------------------|----------|-----------------|
+| -5088363674211922423 | 0        | Divit Dhaliwal  |
+| 6557666280550701355  | 1        | Indrans Sridhar |
+| -2149788664940846734 | 3        | Pranay Khanna   |
+| -3941247926715736890 | 8        | Riaan Dua       |
+| -3101076015498625604 | 5        | Vedika Rout     |
+| -7884339441528700576 | 4        | Abram Chokshi   |
+| -2718521057113461678 | 4        | Romil Kapoor    |
+```
+
+1. Невозможно заполнить генератор случайных чисел SQLite другим способом.
+2. А это значит, что нет возможности воспроизвести его псевдослучайные последовательности
+3. Это означает, что вы никогда не должны использовать его
+4. Как вы собираетесь отлаживать то, что не можете перезапустить?
+
+#### Упражнение
+
+Напишите запрос, который:
+ - использует CTE для создания 1000 случайных чисел от 0 до 10 включительно;
+ - использует второй CTE для расчета среднего значения
+ - использует третий CTE и встроенные математические функции SQLite для расчета их стандартного отклонения.
+
+ 
