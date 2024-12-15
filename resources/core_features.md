@@ -591,11 +591,11 @@ with person as (
         personal || ' ' || family as name
     from staff
 )
-
 select
     left_person.name,
     right_person.name
-from person as left_person inner join person as right_person
+from person as left_person 
+inner join person as right_person
 limit 10;
 ```
 ```
@@ -627,12 +627,12 @@ with person as (
         personal || ' ' || family as name
     from staff
 )
-
 select
     left_person.name,
     right_person.name
-from person as left_person inner join person as right_person
-on left_person.ident < right_person.ident
+from person as left_person 
+inner join person as right_person
+    on left_person.ident < right_person.ident
 where left_person.ident <= 4 and right_person.ident <= 4;
 ```
 ```
@@ -652,6 +652,8 @@ where left_person.ident <= 4 and right_person.ident <= 4;
 
 ### Фильтрация пар
 
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/ecdd4df71c7daa33133c385b39921160/))
+
 ```sql
 with
 person as (
@@ -660,20 +662,21 @@ person as (
         personal || ' ' || family as name
     from staff
 ),
-
 together as (
     select
         left_perf.staff as left_staff,
         right_perf.staff as right_staff
-    from performed as left_perf inner join performed as right_perf
+    from performed as left_perf 
+    inner join performed as right_perf
         on left_perf.experiment = right_perf.experiment
     where left_staff < right_staff
 )
-
 select
     left_person.name as person_1,
     right_person.name as person_2
-from person as left_person inner join person as right_person join together
+from person as left_person 
+inner join person as right_person 
+inner join together
     on left_person.ident = left_staff and right_person.ident = right_staff;
 ```
 ```
