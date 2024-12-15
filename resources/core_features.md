@@ -548,16 +548,18 @@ group by work.person;
 
 - coalesce(val1, val2, …) возвращает первое непустое (не `null`) значение
 
-### Полное внешнее соединение
+### Полное внешнее соединение (full outer join)
 
-- Полное внешнее соединение — это объединение левого внешнего соединения и правого внешнего соединения.
-- Почти то же самое, что и перекрестное соединение, но учтите:
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/e7704a20a449ccf988505bffc80bb27f/))
+
+- Полное внешнее соединение (`full outer join`) — это объединение левого внешнего соединения (`left outer join`) и правого внешнего соединения (`right outer join`).
+- Почти то же самое, что и перекрестное соединение (`cross join`), но учтите, в случае если одна из таблиц пуста полное внешнее соединение приведет к пустому (`null`) результату.
 
 ```sql
 create table size (
     s text not null
 );
-insert into size values ('light'), ('heavy');
+insert into size values ('small'), ('large');
 
 create table weight (
     w text not null
@@ -568,13 +570,12 @@ from size
 full outer join weight;
 ```
 ```
-|   s   | w |
-|-------|---|
-| light |   |
-| heavy |   |
-```
+| s     | w      |
+|-------|--------|
+| small | [null] |
+| large | [null] |
 
-- Полное внешнее соединение приведет к пустому результату
+```
 
 #### Упражнение
 
