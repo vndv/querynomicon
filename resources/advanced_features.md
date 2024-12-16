@@ -216,3 +216,129 @@ from machine;
 #### Упражнение
 
 1. В рамках очистки базы данных лабораторных журналов (таблица `usage`) измените данные в поле `log` так, чтобы заменить названия машин в записях на соответствующие идентификаторы этих машин из таблицы `machine`.
+
+## Обновление бызы данных Penguins
+
+```sql
+select
+    species,
+    count(*) as num
+from penguins
+group by species;
+```
+```
+|  species  | num |
+|-----------|-----|
+| Adelie    | 152 |
+| Chinstrap | 68  |
+| Gentoo    | 124 |
+```
+
+- Мы восстановим полную базу данных после каждого примера.
+
+## Tombstones
+
+```sql
+-- добавим колонку для хранения признака 
+alter table penguins
+add active integer not null default 1;
+
+-- щтметим неактивных
+update penguins
+set active = iif(species = 'Adelie', 0, 1);
+
+-- посчитаем активных
+select
+    species,
+    count(*) as num
+from penguins
+where active
+group by species;
+```
+```
+|  species  | num |
+|-----------|-----|
+| Chinstrap | 68  |
+| Gentoo    | 124 |
+```
+
+- Используйте `tombstone` для обозначения (не)активных записей
+- Теперь каждый запрос должен включать его в условие.
+
+## Импорт CSV файлов
+
+- SQLite и большинство других СУБД имеют инструменты для импорта и экспорта CSV.
+- Процесс импорта в SQLite:
+    1. Определение таблицы
+    2. Импорт данных
+    3. Преобразование пустых строк в значения NULL (при нелбходимости).
+    4. Преобразование типов из текста в любые (не показано ниже).
+
+```sql
+drop table if exists penguins;
+
+.mode csv penguins
+.import misc/penguins.csv penguins
+
+-- конвертируем пустые строки в null
+update penguins set species = null where species = '';
+update penguins set island = null where island = '';
+update penguins set bill_length_mm = null where bill_length_mm = '';
+update penguins set bill_depth_mm = null where bill_depth_mm = '';
+update penguins set flipper_length_mm = null where flipper_length_mm = '';
+update penguins set body_mass_g = null where body_mass_g = '';
+update penguins set sex = null where sex = '';
+```
+
+#### Упражнение
+
+1. Каковы будут типы данных столбцов в таблице `penguins`, созданной с помощью импорта CSV, показанного выше? 
+2. Как можно исправить те, которые требуют исправления?
+
+## Представления (views)
+
+```sql
+create view if not exists
+active_penguins (
+    species,
+    island,
+    bill_length_mm,
+    bill_depth_mm,
+    flipper_length_mm,
+    body_mass_g,
+    sex
+) as
+select
+    species,
+    island,
+    bill_length_mm,
+    bill_depth_mm,
+    flipper_length_mm,
+    body_mass_g,
+    sex
+from penguins
+where active;
+
+select
+    species,
+    count(*) as num
+from active_penguins;
+group by species;
+```
+```
+|  species  | num |
+|-----------|-----|
+| Chinstrap | 68  |
+| Gentoo    | 124 |
+```
+
+- Представление — это сохраненный запрос, который могут вызывать другие запросы.
+- Представление вычисляется каждый раз при использовании.
+- Похоже на CTE, но:
+    - Может совместно использоваться запросами.
+    - Представления в SQL появились первыми. CTE относительно новый инструмент.
+    - Некоторые СУБД предлагают материализованные представления - временные таблицы с обновлением по требованию.
+
+#### Упражнение
+
+1. Создайте представление в базе данных журнала лаборатории под названием `busy` с двумя столбцами: `machine_id` и `total_log_length`. В первом столбце пердставьте числовой идентификатор каждой машины; во втором - общее количество записей журнала для этой машины.
