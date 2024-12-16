@@ -409,7 +409,7 @@ select * from backup;
 <img src="./assets/core_datamod_concept_map.svg" alt="Описание" style="max-width:100%; height:auto;">
 
 
-## Объединение таблиц (join)
+## Объединение таблиц (cross join)
 
 ```sql
 select *
@@ -435,6 +435,7 @@ cross join job;
 
 - `join` объединяет информацию из двух таблиц.
 - `cross join` создает перекрестное (или декартово) произведение - все комбинации строк из каждой таблицы.
+- количество строк в результате равно произведению количества строк в каждой из таблиц (m * n). Если одна из таблиц пуста то и результат будет пуст.
 
 В данном случае результат не особенно полезен: значения задания и имени не совпадают, то есть в объединенных данных есть записи, части которых не связаны друг с другом.
 *Но это не значит что `cross join` бесполезен всегда. Есть ситуации когда он единственное решение*
@@ -548,16 +549,18 @@ group by work.person;
 
 - coalesce(val1, val2, …) возвращает первое непустое (не `null`) значение
 
-### Полное внешнее соединение
+### Полное внешнее соединение (full outer join)
 
-- Полное внешнее соединение — это объединение левого внешнего соединения и правого внешнего соединения.
-- Почти то же самое, что и перекрестное соединение, но учтите:
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/e7704a20a449ccf988505bffc80bb27f/))
+
+- Полное внешнее соединение (`full outer join`) — это объединение левого внешнего соединения (`left outer join`) и правого внешнего соединения (`right outer join`).
+- Почти то же самое, что и перекрестное соединение (`cross join`), но учтите, в случае если одна из таблиц пуста полное внешнее соединение приведет к пустому (`null`) результату.
 
 ```sql
 create table size (
     s text not null
 );
-insert into size values ('light'), ('heavy');
+insert into size values ('small'), ('large');
 
 create table weight (
     w text not null
@@ -568,13 +571,12 @@ from size
 full outer join weight;
 ```
 ```
-|   s   | w |
-|-------|---|
-| light |   |
-| heavy |   |
-```
+| s     | w      |
+|-------|--------|
+| small | [null] |
+| large | [null] |
 
-- Полное внешнее соединение приведет к пустому результату
+```
 
 #### Упражнение
 
@@ -589,11 +591,11 @@ with person as (
         personal || ' ' || family as name
     from staff
 )
-
 select
     left_person.name,
     right_person.name
-from person as left_person inner join person as right_person
+from person as left_person 
+inner join person as right_person
 limit 10;
 ```
 ```
@@ -625,12 +627,12 @@ with person as (
         personal || ' ' || family as name
     from staff
 )
-
 select
     left_person.name,
     right_person.name
-from person as left_person inner join person as right_person
-on left_person.ident < right_person.ident
+from person as left_person 
+inner join person as right_person
+    on left_person.ident < right_person.ident
 where left_person.ident <= 4 and right_person.ident <= 4;
 ```
 ```
@@ -650,6 +652,8 @@ where left_person.ident <= 4 and right_person.ident <= 4;
 
 ### Фильтрация пар
 
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/ecdd4df71c7daa33133c385b39921160/))
+
 ```sql
 with
 person as (
@@ -658,20 +662,21 @@ person as (
         personal || ' ' || family as name
     from staff
 ),
-
 together as (
     select
         left_perf.staff as left_staff,
         right_perf.staff as right_staff
-    from performed as left_perf inner join performed as right_perf
+    from performed as left_perf 
+    inner join performed as right_perf
         on left_perf.experiment = right_perf.experiment
     where left_staff < right_staff
 )
-
 select
     left_person.name as person_1,
     right_person.name as person_2
-from person as left_person inner join person as right_person join together
+from person as left_person 
+inner join person as right_person 
+inner join together
     on left_person.ident = left_staff and right_person.ident = right_staff;
 ```
 ```
