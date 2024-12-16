@@ -42,7 +42,14 @@
         crossChapter: true,
         crossChapterText: true,
       },
-      search: 'auto', // default
+      search: {
+        maxAge: 43200000, // 12h
+        paths: [],
+        placeholder: 'Введите для поиска',
+        noData: 'Нет результатов!',
+        depth: 6,
+        hideOtherSidebarContent: true, // whether or not to hide other sidebar content
+      }
     }
   </script>
   <!-- Docsify v4 -->
