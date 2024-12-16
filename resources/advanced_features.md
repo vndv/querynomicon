@@ -342,3 +342,70 @@ group by species;
 #### Упражнение
 
 1. Создайте представление в базе данных журнала лаборатории под названием `busy` с двумя столбцами: `machine_id` и `total_log_length`. В первом столбце пердставьте числовой идентификатор каждой машины; во втором - общее количество записей журнала для этой машины.
+
+### Проверка знаний
+
+<img src="./assets/advanced_temp_concept_map.svg" alt="Проверка знаний" style="max-width:100%; height:auto;">
+
+
+## Напоминание о часах
+
+```sql
+-- создаём таблицу
+create table job (
+    name text not null,
+    billable real not null
+);
+-- вносим данные
+insert into job values
+    ('calibrate', 1.5),
+    ('clean', 0.5);
+-- проверяем результат
+select * from job;
+```
+```
+|   name    | billable |
+|-----------|----------|
+| calibrate | 1.5      |
+| clean     | 0.5      |
+```
+
+## Добавляем ограничения
+
+```sql
+-- создаём таблицу с ограничением
+create table job (
+    name text not null,
+    billable real not null,
+    check (billable > 0.0)
+);
+
+-- вносим данные
+insert into job values ('calibrate', 1.5);
+insert into job values ('reset', -0.5);
+```
+- получаем ошибку
+```
+Runtime error near line 9: CHECK constraint failed: billable > 0.0 (19)
+```
+```sql
+-- проверяем результат
+select * from job;
+```
+строка не прошедшая проверку не внесена в таблицу
+```
+|   name    | billable |
+|-----------|----------|
+| calibrate | 1.5      |
+```
+
+- Функция `check` добавляет ограничение в таблицу:
+    - Должна выдавать результат типа `boolean`.
+    - Выполняется каждый раз, когда значения добавляются или изменяются.
+    - Но изменения, внесенные до ошибки, вступают в силу.
+
+#### Упражнение
+
+1. Перепишите определение таблицы `penguins`, добавив следующие ограничения:
+    - `body_mass_g` должен быть неотрицательным.
+    - `island` должен быть одним из "Biscoe", "Dream" или "Torgersen". (Подсказка: оператор `in` здесь будет полезен.)
