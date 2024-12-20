@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Document</title>
@@ -10,6 +11,7 @@
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
   <link rel="stylesheet" href="assets/style.css" />
 </head>
+
 <body>
   <div id="app"></div>
   <script>
@@ -17,10 +19,13 @@
       name: 'querynomicon',
       repo: 'true',
       corner: {
-        url: "https://github.com/vndv/querynomicon",  
+        url: "https://github.com/vndv/querynomicon",
         icon: "github",
       },
       loadSidebar: true,
+      alias: {
+        '/.*/_sidebar.md': '/_sidebar.md',
+      },
       enableSidebarCollapse: true,
       subMaxLevel: 3,
       coverpage: true,
@@ -34,15 +39,15 @@
         height: "5px",
       },
       pagination: {
-    previousText: 'Назад',
-    // or
-    nextText: {
-      '/en/': 'NEXT',
-      '/': 'Вперед'
-    },
-    crossChapter: true,
-    crossChapterText: true,
-  },
+        previousText: 'Назад',
+        // or
+        nextText: {
+          '/en/': 'NEXT',
+          '/': 'Вперед'
+        },
+        crossChapter: true,
+        crossChapterText: true,
+      },
     }
   </script>
   <!-- Docsify v4 -->
@@ -53,5 +58,8 @@
   <script src="//unpkg.com/docsify-pagination/dist/docsify-pagination.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-corner/dist/docsify-corner.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-sql.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify-sidebar-collapse/dist/docsify-sidebar-collapse.min.js"></script>
 </body>
+
 </html>
