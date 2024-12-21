@@ -9,5 +9,6 @@
 * [Управление данными в базе](/resources/data_manipulation.md)
 * [Инструменты](/resources/tools.md)
 * [Python](/resources/python.md)
+* [R](/resources/r_lang.md)
 * [Словарь терминов](/resources/glossary.md)
 * [Контрибьюторы](/resources/contributors.md)
