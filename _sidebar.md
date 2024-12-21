@@ -10,5 +10,6 @@
 * [Инструменты](/resources/tools.md)
 * [Python](/resources/python.md)
 * [R](/resources/r_lang.md)
+* [PostgreSQL](/resources/postgre_sql.md)
 * [Словарь терминов](/resources/glossary.md)
 * [Контрибьюторы](/resources/contributors.md)
