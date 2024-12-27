@@ -494,7 +494,7 @@ insert or rollback into job values
 
 insert or rollback into job values
     ('Очистка', 0.5),
-    ('reset', -0.5);
+    ('Сброс', -0.5);
 
 select * from job;
 ```
@@ -528,7 +528,7 @@ select * from jobs_done;
 ```
 | person | num |
 |--------|-----|
-| zia    | 1   |
+| Антон  | 1   |
 ```
 ```sql
 -- вносим данные
@@ -543,7 +543,7 @@ UNIQUE constraint failed: jobs_done.person (19)
 
 | person | num |
 |--------|-----|
-| zia    | 1   |
+| Антон  | 1   |
 ```
 ```sql
 -- вносим данные используя upsert
@@ -559,7 +559,7 @@ select * from jobs_done;
 ```
 | person | num |
 |--------|-----|
-| zia    | 2   |
+| Антон  | 2   |
 ```
 
 - upsert расшифровывается как "обновить или вставить" (update or insert).
@@ -578,95 +578,100 @@ select * from jobs_done;
 
 ## Нормализация
 
-First normal form (1NF): every field of every record contains one indivisible value.
-Second normal form (2NF) and third normal form (3NF): every value in a record that isn't a key depends solely on the key, not on other values.
-Denormalization: explicitly store values that could be calculated on the fly to simplify queries and/or make processing faster
+- Нормализация — это процесс организации данных в базе данных.
+- Цель: уменьшить дублирование и избежать аномалий.
+- Первая нормальная форма (1NF): каждое поле каждой записи содержит одно неделимое значение.
+- Вторая нормальная форма (2NF) и третья нормальная форма (3NF): каждое значение в записи, которое не является ключом, зависит исключительно от ключа, а не от других значений.
+- Денормализация: явное хранение значений, которые можно было бы вычислить на лету, чтобы упростить запросы и/или ускорить обработку.
 
 ## Создание триггеров
 
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/b113b9038a7bbe90e5a05be8a31158e0/))
+
 ```sql
--- Track hours of lab work.
+-- создаем таблицу учёта рабочего времени
 create table job (
     person text not null,
     reported real not null check (reported >= 0.0)
 );
 
--- Explicitly store per-person total rather than using sum().
+-- создаем таблицу с общим временем работы
 create table total (
     person text unique not null,
     hours real
 );
 
--- Initialize totals.
-insert into total values
-    ('gene', 0.0),
-    ('august', 0.0);
-
--- Define a trigger.
+-- создаем триггер для обновления таблицы `total`
 create trigger total_trigger
 before insert on job
 begin
-    -- Check that the person exists.
-    select case
-        when not exists (select 1 from total where person = new.person)
-        then raise(rollback, 'Unknown person ')
-    end;
-    -- Update their total hours (or fail if non-negative constraint violated).
-    update total
-    set hours = hours + new.reported
-    where total.person = new.person;
+    insert into total values
+        (new.person, new.reported)
+    on conflict(person) do update set hours = hours + new.reported;
 end;
 ```
 
-A trigger automatically runs before or after a specified operation
-Can have side effects (e.g., update some other table)
-And/or implement checks (e.g., make sure other records exist)
-Add processing overhead…
-…but data is either cheap or correct, never both
-Inside trigger, refer to old and new versions of record as old.column and new.column
+- Триггер — это автоматически выполняемый код, который реагирует на изменения в базе данных.
+- Триггеры могут выполняться до или после операции.
+- Триггеры могут выполняться на вставку, обновление или удаление.
+- Триггеры могут быть использованы для проверки данных, обновления связанных таблиц и многого другого.
+- Триггеры могут быть отключены, включены или удалены.
+- Триггеры могут быть созданы в любой момент, в любой таблице и в любой базе данных.
+- Триггеры могут быть созданы в любой СУБД, но синтаксис может отличаться.
+- Внутри триггера можнообращаться к старой и новой версии записи как old.column и new.column.
 
-## Триггер не срабатывает
-
+## Срабатывание триггера
 ```sql
+-- вносим данные
 insert into job values
-    ('gene', 1.5),
-    ('august', 0.5),
-    ('gene', 1.0);
+    ('Олег', 1.5),
+    ('Сергей', 0.5),
+    ('Олег', 1.0);
+
+-- проверяем результат
+select * from job;
+
+select * from total;
 ```
 ```
 | person | reported |
 |--------|----------|
-| gene   | 1.5      |
-| august | 0.5      |
-| gene   | 1.0      |
+| Олег   | 1.5      |
+| Сергей | 0.5      |
+| Олег   | 1.0      |
 
 | person | hours |
 |--------|-------|
-| gene   | 2.5   |
-| august | 0.5   |
+| Олег   | 2.5   |
+| Сергей | 0.5   |
 ```
+- данные в таблице `total` обновились автоматически.
 
-## Срабатывание триггера
+## Триггер не срабатывает
 
 ```sql
+-- вносим данные
 insert into job values
-    ('gene', 1.0),
-    ('august', -1.0);
+    ('Олег', 1.0),
+    ('Сергей', -1.0);
+
+-- проверяем результат
+select * from job;
+
+select * from total;
 ```
 ```
-Runtime error near line 6: CHECK constraint failed: reported >= 0.0 (19)
+CHECK constraint failed: reported >= 0.0 (19)
 
 | person | hours |
 |--------|-------|
-| gene   | 0.0   |
-| august | 0.0   |
+| Олег   | 0.0   |
+| Сергей | 0.0   |
 ```
+- данные не внесены в таблицу `total` из-за нарушения ограничения.
 
 #### Упражнение
-1. Using the penguins database:
-    - create a table called species with columns name and count; and
-    - define a trigger that increments the count associated with each species each time a new penguin is added to the penguins table.
-    - Does your solution behave correctly when several penguins are added by a single insert statement?
+
 1. Использование базы данных пингвинов:
 - создайте таблицу с именем `species` со столбцами `name` и `count` и
 - определите триггер, который увеличивает счетчик, связанный с каждым видом, каждый раз, когда в таблицу penguins добавляется новый пингвин.
@@ -674,12 +679,15 @@ Runtime error near line 6: CHECK constraint failed: reported >= 0.0 (19)
 
 ## Представление графов
 
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/914fe4ac2fb3b316223c79608bcf4f71/))
+
 ```sql
+-- создаем таблицу родословной
 create table lineage (
     parent text not null,
     child text not null
 );
-
+-- вносим данные
 insert into lineage values
     ('Arturo', 'Clemente'),
     ('Darío', 'Clemente'),
@@ -712,6 +720,8 @@ select * from lineage;
 
 ## Рекурсивные запросы
 
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/393c66e0a9580d88a89f9ef8ed4474d1/))
+
 ```sql
 with recursive descendent as (
     select
@@ -721,7 +731,8 @@ with recursive descendent as (
     select
         lineage.child as person,
         descendent.generations + 1 as generations
-    from descendent inner join lineage
+    from descendent 
+    inner join lineage
         on descendent.person = lineage.parent
 )
 select
@@ -739,20 +750,13 @@ from descendent;
 | Santiago | 3           |
 ```
 
-Use a recursive CTE to create a temporary table (descendent)
-Base case seeds this table
-Recursive case relies on value(s) already in that table and external table(s)
-union all to combine rows
-Can use union but that has lower performance (must check uniqueness each time)
-Stops when the recursive case yields an empty row set (nothing new to add)
-Then select the desired values from the CTE
-Используйте рекурсивное CTE для создания временной таблицы (потомка)
-Базовый случай задает эту таблицу
-Рекурсивный случай опирается на значения, уже находящиеся в этой таблице, и внешние таблицы
-union all для объединения строк
-Можно использовать union, но это имеет более низкую производительность (необходимо проверять уникальность каждый раз)
-Останавливается, когда рекурсивный случай выдает пустой набор строк (нечего нового добавлять)
-Затем выберите нужные значения из CTE
+- Используйте рекурсивное CTE для создания временной таблицы (потомка).
+- Базовый случай задает эту таблицу.
+- Рекурсивный случай опирается на значения, уже находящиеся в этой таблице, и внешние таблицы.
+- Используйте `union all` для объединения строк
+  *Можно использовать `union`, но это имеет более низкую производительность (необходимо проверять уникальность каждый раз)*
+- Рекурсия останавливается, когда рекурсивный случай выдает пустой набор строк (нечего нового добавлять).
+- Затем выберите нужные значения из CTE
 
 #### Упражнение
 
@@ -760,6 +764,8 @@ union all для объединения строк
 2. Влияет ли это на результат? Почему или почему нет?
 
 ## База данных отслеживания контактов
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/7ce208fe11ac9be3fbbb4105304bc5c6/))
 
 ```sql
 select * from person;
@@ -799,42 +805,52 @@ select * from contact;
 | Daniela Menéndez  | Marco Antonio Barrera |
 ```
 
-- Contact Diagram (box and line diagram showing who has had contact with whom)
-<img src="./assets/advanced_recursive_contacts.svg" alt="box and line diagram showing who has had contact with whom" style="max-width:100%; height:auto;">
+- Диаграмма контактов (диаграмма с прямоугольниками и линиями, показывающая, кто с кем контактировал)
+<img 
+    src="./assets/advanced_recursive_contacts.svg" 
+    alt="Диаграмма контактов (диаграмма с прямоугольниками и линиями, показывающая, кто с кем контактировал)" 
+    style="max-width:100%; height:auto;">
 
-## Двунаправленные контакты
+## Временные таблицы
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/67d427000f1c354777f8701e548a0896/))
 
 ```sql
+-- создаем временную таблицу
 create temporary table bi_contact (
     left text,
     right text
 );
 
+-- вносим данные во временную таблицу на основе данных из таблицы `contact`
 insert into bi_contact
 select
     left, right from contact
     union all
     select right, left from contact
 ;
+-- проверяем результат (данные дублированы)
+select count(*) original_count from contact;
+
+select count(*) num_bi_contacts from bi_contact;
 ```
 ```
 | original_count |
 |----------------|
 | 8              |
 
-| num_contact |
-|-------------|
-| 16          |
+| num_bi_contacts |
+|-----------------|
+| 16              |
 ```
 
-Create a temporary table rather than using a long chain of CTEs
-Only lasts as long as the session (not saved to disk)
-Duplicate information rather than writing more complicated query
-- Создайте временную таблицу вместо использования длинной цепочки CTE
-- Действует только до тех пор, пока длится сеанс (не сохраняется на диске)
-- Дублируйте информацию вместо написания более сложного запроса
+- Создайте временную таблицу вместо использования длинной цепочки CTE.
+- Временная таблица существует только до тех пор, пока длится сеанс (не сохраняется на диске).
+- Дублируйте информацию вместо написания более сложного запроса.
 
 ## Обновление идентификаторов групп
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/9359987da54942c6acf20c431520ea1f/))
 
 ```sql
 select
@@ -914,14 +930,16 @@ order by label, name;
 | Óscar Barrios         | 15       |
 ```
 
-Используйте `union` вместо `union all`, чтобы предотвратить бесконечную рекурсию.
+- Используйте `union` вместо `union all`, чтобы предотвратить бесконечную рекурсию.
 
 #### Упражнение
 
 1. Измените запрос выше, чтобы использовать `union all` вместо `union` для запуска бесконечной рекурсии. 
 2. Как можно изменить запрос так, чтобы он останавливался на определенной глубине, чтобы можно было проследить его вывод?
 
-Check Understanding
-<img src="./assets/advanced_cte_concept_map.svg" alt="box and arrow diagram showing concepts related to common table expressions in SQL" style="max-width:100%; height:auto;">
-
 Концептуальная карта: общие табличные выражения (CTE)
+<img 
+    src="./assets/advanced_cte_concept_map.svg" 
+    alt="Концептуальная карта: общие табличные выражения (CTE)" 
+    style="max-width:100%; height:auto;">
+
