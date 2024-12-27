@@ -358,16 +358,16 @@ create table job (
 );
 -- вносим данные
 insert into job values
-    ('calibrate', 1.5),
-    ('clean', 0.5);
+    ('Калибровка', 1.5),
+    ('Очистка', 0.5);
 -- проверяем результат
 select * from job;
 ```
 ```
-|   name    | billable |
-|-----------|----------|
-| calibrate | 1.5      |
-| clean     | 0.5      |
+| name       | billable |
+|------------|----------|
+| Калибровка | 1.5      |
+| Очистка    | 0.5      |
 ```
 
 ## Добавляем ограничения
@@ -381,23 +381,22 @@ create table job (
 );
 
 -- вносим данные
-insert into job values ('calibrate', 1.5);
-insert into job values ('reset', -0.5);
-```
-- получаем ошибку
-```
-Runtime error near line 9: CHECK constraint failed: billable > 0.0 (19)
-```
-```sql
+insert into job values ('Калибровка', 1.5);
+insert into job values ('Очистка', -0.5);
+
 -- проверяем результат
 select * from job;
 ```
-строка не прошедшая проверку не внесена в таблицу
+
 ```
-|   name    | billable |
-|-----------|----------|
-| calibrate | 1.5      |
+CHECK constraint failed: billable > 0.0
+
+| name       | billable |
+|------------|----------|
+| Калибровка | 1.5      |
 ```
+- получаем ошибку
+- строка не прошедшая проверку не внесена в таблицу
 
 - Функция `check` добавляет ограничение в таблицу:
     - Должна выдавать результат типа `boolean`.
@@ -409,3 +408,538 @@ select * from job;
 1. Перепишите определение таблицы `penguins`, добавив следующие ограничения:
     - `body_mass_g` должен быть неотрицательным.
     - `island` должен быть одним из "Biscoe", "Dream" или "Torgersen". (Подсказка: оператор `in` здесь будет полезен.)
+
+## ACID (Atomicity, Consistency, Isolation, Durability)
+
+ACID — это набор свойств транзакций базы данных, гарантирующих надежность и целостность данных при операциях с ними. Аббревиатура ACID расшифровывается как:
+
+- Atomicity (Атомарность): гарантирует, что транзакция будет выполнена целиком или не будет выполнена вовсе. Недопустимы частичные изменения данных. Если в процессе выполнения транзакции происходит ошибка, все изменения, которые успели произойти, отменяются, и база данных возвращается в исходное состояние. Это похоже на неделимую операцию: либо всё, либо ничего.
+- Consistency (Согласованность/Непротиворечивость): гарантирует, что транзакция переводит базу данных из одного согласованного состояния в другое. Согласованное состояние означает, что данные в базе соответствуют всем заданным правилам и ограничениям (например, ограничениям целостности, уникальности и т. д.). Если транзакция нарушает какое-либо из этих правил, она отменяется.
+- Isolation (Изолированность): гарантирует, что параллельные транзакции не влияют друг на друга. Каждая транзакция выполняется так, как будто она является единственной, работающей с базой данных в данный момент. Это предотвращает возникновение ошибок, связанных с одновременным доступом и изменением данных разными транзакциями. Существуют различные уровни изоляции, определяющие степень защиты от таких ошибок.
+- Durability (Стойкость/Надежность): гарантирует, что результаты успешно завершенной транзакции сохраняются в базе данных и не будут потеряны в случае сбоя системы (например, отключения питания). Обычно это достигается путем записи изменений на энергонезависимый носитель (например, жесткий диск).
+
+Простыми словами: ACID гарантирует, что любая операция с базой данных будет выполнена надежно и безопасно. Если вы, например, переводите деньги с одного счета на другой, ACID гарантирует, что деньги будут списаны с первого счета и зачислены на второй, и что эта операция не будет прервана посередине из-за какой-либо ошибки, а так же что результаты этой операции будут сохранены и не потеряются.
+
+## Транзакции
+
+```sql
+create table job (
+    name text not null,
+    billable real not null,
+    check (billable > 0.0)
+);
+
+insert into job values ('Калибровка', 1.5);
+
+begin transaction;
+insert into job values ('Очистка', 0.5);
+rollback;
+
+select * from job;
+```
+```
+| name       | billable |
+|------------|----------|
+| Калибровка | 1.5      |
+```
+
+- Операторы вне транзакции выполняются и фиксируются в базе немедленно.
+- Операторы внутри транзакции не вступают в силу до тех пор, пока транзакция не будет полностью и успешно завершена или отменена.
+- В транзакции может быть любое количество операторов.
+- Но в SQLite нельзя вкладывать транзакции. (Другие СУБД поддерживают это.)
+
+## Откат в результате ограничения
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/72a1ca04957cfe43afd251b552587723/))
+
+```sql
+create table job (
+    name text not null,
+    billable real not null,
+    check (billable > 0.0) on conflict rollback
+);
+
+insert into job values
+    ('Калибровка', 1.5);
+
+insert into job values
+    ('Очистка', 0.5),
+    ('Сброс', -0.5);
+
+select * from job;
+```
+```
+CHECK constraint failed: billable > 0.0 (19)
+
+| name       | billable |
+|------------|----------|
+| Калибровка | 1.5      |
+```
+
+Второй insert откатился сразу после возникновения ошибки, но первый insert вступил в силу.
+
+## Откат в запросах
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/7e288b6fec3ad8b9239cb36c19bb5f5b/))
+
+```sql
+create table job (
+    name text not null,
+    billable real not null,
+    check (billable > 0.0)
+);
+
+insert or rollback into job values
+    ('Калибровка', 1.5);
+
+insert or rollback into job values
+    ('Очистка', 0.5),
+    ('Сброс', -0.5);
+
+select * from job;
+```
+```
+CHECK constraint failed: billable > 0.0 (19)
+
+| name       | billable |
+|------------|----------|
+| Калибровка | 1.5      |
+```
+
+- Ограничения включаются в определение таблицы.
+- Действия включаются в оператор.
+
+## Upsert
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/495404bbccf6adc8bbb3b466393cf99b/))
+
+```sql
+-- создаем таблицу
+create table jobs_done (
+    person text unique,
+    num integer default 0
+);
+-- вносим данные
+insert into jobs_done values
+    ('Антон', 1);
+-- проверяем результат
+select * from jobs_done;
+```
+```
+| person | num |
+|--------|-----|
+| Антон  | 1   |
+```
+```sql
+-- вносим данные
+insert into jobs_done values
+    ('Антон', 1);
+-- получаем ошибку
+-- проверяем результат
+select * from jobs_done;
+```
+```
+UNIQUE constraint failed: jobs_done.person (19)
+
+| person | num |
+|--------|-----|
+| Антон  | 1   |
+```
+```sql
+-- вносим данные используя upsert
+insert into jobs_done values
+    ('Антон', 1)
+on conflict(person) do update set num = num + 1;
+
+-- ошибка не возникла
+-- проверяем результат (данные обновились)
+select * from jobs_done;
+```
+
+```
+| person | num |
+|--------|-----|
+| Антон  | 2   |
+```
+
+- upsert расшифровывается как "обновить или вставить" (update or insert).
+- Создает запись, если ее не существует.
+- Обновляет, если существует.
+- Не является стандартом SQL, но широко используется.
+
+#### Упражнение
+1. Используя базу данных журнала лаборатории, создайте таблицу с именем `staff` с тремя столбцами: `personal`, `family` и `dept`. Столбец `personal` должен быть уникальным. Затем используйте оператор upsert, чтобы добавить или изменить людей в таблице `staff`, как показано:
+    ```
+    personal    family  dept    age
+    Pranay      Khanna  mb	    41
+    Riaan       Dua     gen	    23
+    Parth	    Johel   gen	    27
+    ``` 
+
+## Нормализация
+
+- Нормализация — это процесс организации данных в базе данных.
+- Цель: уменьшить дублирование и избежать аномалий.
+- Первая нормальная форма (1NF): каждое поле каждой записи содержит одно неделимое значение.
+- Вторая нормальная форма (2NF) и третья нормальная форма (3NF): каждое значение в записи, которое не является ключом, зависит исключительно от ключа, а не от других значений.
+- Денормализация: явное хранение значений, которые можно было бы вычислить на лету, чтобы упростить запросы и/или ускорить обработку.
+
+## Создание триггеров
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/b113b9038a7bbe90e5a05be8a31158e0/))
+
+```sql
+-- создаем таблицу учёта рабочего времени
+create table job (
+    person text not null,
+    reported real not null check (reported >= 0.0)
+);
+
+-- создаем таблицу с общим временем работы
+create table total (
+    person text unique not null,
+    hours real
+);
+
+-- создаем триггер для обновления таблицы `total`
+create trigger total_trigger
+before insert on job
+begin
+    insert into total values
+        (new.person, new.reported)
+    on conflict(person) do update set hours = hours + new.reported;
+end;
+```
+
+- Триггер — это автоматически выполняемый код, который реагирует на изменения в базе данных.
+- Триггеры могут выполняться до или после операции.
+- Триггеры могут выполняться на вставку, обновление или удаление.
+- Триггеры могут быть использованы для проверки данных, обновления связанных таблиц и многого другого.
+- Триггеры могут быть отключены, включены или удалены.
+- Триггеры могут быть созданы в любой момент, в любой таблице и в любой базе данных.
+- Триггеры могут быть созданы в любой СУБД, но синтаксис может отличаться.
+- Внутри триггера можнообращаться к старой и новой версии записи как old.column и new.column.
+
+## Срабатывание триггера
+```sql
+-- вносим данные
+insert into job values
+    ('Олег', 1.5),
+    ('Сергей', 0.5),
+    ('Олег', 1.0);
+
+-- проверяем результат
+select * from job;
+
+select * from total;
+```
+```
+| person | reported |
+|--------|----------|
+| Олег   | 1.5      |
+| Сергей | 0.5      |
+| Олег   | 1.0      |
+
+| person | hours |
+|--------|-------|
+| Олег   | 2.5   |
+| Сергей | 0.5   |
+```
+- данные в таблице `total` обновились автоматически.
+
+## Триггер не срабатывает
+
+```sql
+-- вносим данные
+insert into job values
+    ('Олег', 1.0),
+    ('Сергей', -1.0);
+
+-- проверяем результат
+select * from job;
+
+select * from total;
+```
+```
+CHECK constraint failed: reported >= 0.0 (19)
+
+| person | hours |
+|--------|-------|
+| Олег   | 0.0   |
+| Сергей | 0.0   |
+```
+- данные не внесены в таблицу `total` из-за нарушения ограничения.
+
+#### Упражнение
+
+1. Использование базы данных пингвинов:
+- создайте таблицу с именем `species` со столбцами `name` и `count` и
+- определите триггер, который увеличивает счетчик, связанный с каждым видом, каждый раз, когда в таблицу penguins добавляется новый пингвин.
+- Правильно ли ведет себя ваше решение, когда несколько пингвинов добавляются одним оператором вставки?
+
+## Представление графов
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/914fe4ac2fb3b316223c79608bcf4f71/))
+
+```sql
+-- создаем таблицу родословной
+create table lineage (
+    parent text not null,
+    child text not null
+);
+-- вносим данные
+insert into lineage values
+    ('Arturo', 'Clemente'),
+    ('Darío', 'Clemente'),
+    ('Clemente', 'Homero'),
+    ('Clemente', 'Ivonne'),
+    ('Ivonne', 'Lourdes'),
+    ('Soledad', 'Lourdes'),
+    ('Lourdes', 'Santiago');
+
+select * from lineage;
+```
+```
+|  parent  |  child   |
+|----------|----------|
+| Arturo   | Clemente |
+| Darío    | Clemente |
+| Clemente | Homero   |
+| Clemente | Ivonne   |
+| Ivonne   | Lourdes  |
+| Soledad  | Lourdes  |
+| Lourdes  | Santiago |
+```
+
+-  Диаграмма родословной
+<img src="./assets/advanced_recursive_lineage.svg" alt="box and arrow diagram showing who is descended from whom in the lineage database" style="max-width:100%; height:auto;">
+
+
+#### Упражнение
+1. Напишите запрос, который использует самосоединение (self join) для поиска внуков каждого человека.
+
+## Рекурсивные запросы
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/393c66e0a9580d88a89f9ef8ed4474d1/))
+
+```sql
+with recursive descendent as (
+    select
+        'Clemente' as person,
+        0 as generations
+    union all
+    select
+        lineage.child as person,
+        descendent.generations + 1 as generations
+    from descendent 
+    inner join lineage
+        on descendent.person = lineage.parent
+)
+select
+    person,
+    generations
+from descendent;
+```
+```
+|  person  | generations |
+|----------|-------------|
+| Clemente | 0           |
+| Homero   | 1           |
+| Ivonne   | 1           |
+| Lourdes  | 2           |
+| Santiago | 3           |
+```
+
+- Используйте рекурсивное CTE для создания временной таблицы (потомка).
+- Базовый случай задает эту таблицу.
+- Рекурсивный случай опирается на значения, уже находящиеся в этой таблице, и внешние таблицы.
+- Используйте `union all` для объединения строк
+  *Можно использовать `union`, но это имеет более низкую производительность (необходимо проверять уникальность каждый раз)*
+- Рекурсия останавливается, когда рекурсивный случай выдает пустой набор строк (нечего нового добавлять).
+- Затем выберите нужные значения из CTE
+
+#### Упражнение
+
+1. Измените рекурсивный запрос, показанный выше, чтобы использовать `union` вместо `union all`. 
+2. Влияет ли это на результат? Почему или почему нет?
+
+## База данных отслеживания контактов
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/7ce208fe11ac9be3fbbb4105304bc5c6/))
+
+```sql
+select * from person;
+```
+```
+| ident |         name          |
+|-------|-----------------------|
+| 1     | Juana Baeza           |
+| 2     | Agustín Rodríquez     |
+| 3     | Ariadna Caraballo     |
+| 4     | Micaela Laboy         |
+| 5     | Verónica Altamirano   |
+| 6     | Reina Rivero          |
+| 7     | Elias Merino          |
+| 8     | Minerva Guerrero      |
+| 9     | Mauro Balderas        |
+| 10    | Pilar Alarcón         |
+| 11    | Daniela Menéndez      |
+| 12    | Marco Antonio Barrera |
+| 13    | Cristal Soliz         |
+| 14    | Bernardo Narváez      |
+| 15    | Óscar Barrios         |
+```
+```sql
+select * from contact;
+```
+```
+|       left        |         right         |
+|-------------------|-----------------------|
+| Agustín Rodríquez | Ariadna Caraballo     |
+| Agustín Rodríquez | Verónica Altamirano   |
+| Juana Baeza       | Verónica Altamirano   |
+| Juana Baeza       | Micaela Laboy         |
+| Pilar Alarcón     | Reina Rivero          |
+| Cristal Soliz     | Marco Antonio Barrera |
+| Cristal Soliz     | Daniela Menéndez      |
+| Daniela Menéndez  | Marco Antonio Barrera |
+```
+
+**Диаграмма контактов (диаграмма с прямоугольниками и линиями, показывающая, кто с кем контактировал)**
+<img 
+    src="./assets/advanced_recursive_contacts.svg" 
+    alt="Диаграмма контактов (диаграмма с прямоугольниками и линиями, показывающая, кто с кем контактировал)" 
+    style="max-width:100%; height:auto;">
+
+## Временные таблицы
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/67d427000f1c354777f8701e548a0896/))
+
+```sql
+-- создаем временную таблицу
+create temporary table bi_contact (
+    left text,
+    right text
+);
+
+-- вносим данные во временную таблицу на основе данных из таблицы `contact`
+insert into bi_contact
+select
+    left, right from contact
+    union all
+    select right, left from contact
+;
+-- проверяем результат (данные дублированы)
+select count(*) original_count from contact;
+
+select count(*) num_bi_contacts from bi_contact;
+```
+```
+| original_count |
+|----------------|
+| 8              |
+
+| num_bi_contacts |
+|-----------------|
+| 16              |
+```
+
+- Создайте временную таблицу вместо использования длинной цепочки CTE.
+- Временная таблица существует только до тех пор, пока длится сеанс (не сохраняется на диске).
+- Дублируйте информацию вместо написания более сложного запроса.
+
+## Обновление идентификаторов групп
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/9359987da54942c6acf20c431520ea1f/))
+
+```sql
+select
+    left.name as left_name,
+    left.ident as left_ident,
+    right.name as right_name,
+    right.ident as right_ident,
+    min(left.ident, right.ident) as new_ident
+from
+    (person as left join bi_contact on left.name = bi_contact.left)
+    join person as right on bi_contact.right = right.name;
+```
+```
+|       left_name       | left_ident |      right_name       | right_ident | new_ident |
+|-----------------------|------------|-----------------------|-------------|-----------|
+| Juana Baeza           | 1          | Micaela Laboy         | 4           | 1         |
+| Juana Baeza           | 1          | Verónica Altamirano   | 5           | 1         |
+| Agustín Rodríquez     | 2          | Ariadna Caraballo     | 3           | 2         |
+| Agustín Rodríquez     | 2          | Verónica Altamirano   | 5           | 2         |
+| Ariadna Caraballo     | 3          | Agustín Rodríquez     | 2           | 2         |
+| Micaela Laboy         | 4          | Juana Baeza           | 1           | 1         |
+| Verónica Altamirano   | 5          | Agustín Rodríquez     | 2           | 2         |
+| Verónica Altamirano   | 5          | Juana Baeza           | 1           | 1         |
+| Reina Rivero          | 6          | Pilar Alarcón         | 10          | 6         |
+| Pilar Alarcón         | 10         | Reina Rivero          | 6           | 6         |
+| Daniela Menéndez      | 11         | Cristal Soliz         | 13          | 11        |
+| Daniela Menéndez      | 11         | Marco Antonio Barrera | 12          | 11        |
+| Marco Antonio Barrera | 12         | Cristal Soliz         | 13          | 12        |
+| Marco Antonio Barrera | 12         | Daniela Menéndez      | 11          | 11        |
+| Cristal Soliz         | 13         | Daniela Menéndez      | 11          | 11        |
+| Cristal Soliz         | 13         | Marco Antonio Barrera | 12          | 12        |
+```
+
+- `new_ident` - минимум собственного идентификатора и идентификаторов на один шаг дальше
+- Не содержит людей без контактов
+
+## Рекурсивная маркировка
+
+```sql
+with recursive labeled as (
+    select
+        person.name as name,
+        person.ident as label
+    from
+        person
+    union -- not 'union all'
+    select
+        person.name as name,
+        labeled.label as label
+    from
+        (person join bi_contact on person.name = bi_contact.left)
+        join labeled on bi_contact.right = labeled.name
+    where labeled.label < person.ident
+)
+select name, min(label) as group_id
+from labeled
+group by name
+order by label, name;
+```
+```
+|         name          | group_id |
+|-----------------------|----------|
+| Agustín Rodríquez     | 1        |
+| Ariadna Caraballo     | 1        |
+| Juana Baeza           | 1        |
+| Micaela Laboy         | 1        |
+| Verónica Altamirano   | 1        |
+| Pilar Alarcón         | 6        |
+| Reina Rivero          | 6        |
+| Elias Merino          | 7        |
+| Minerva Guerrero      | 8        |
+| Mauro Balderas        | 9        |
+| Cristal Soliz         | 11       |
+| Daniela Menéndez      | 11       |
+| Marco Antonio Barrera | 11       |
+| Bernardo Narváez      | 14       |
+| Óscar Barrios         | 15       |
+```
+
+- Используйте `union` вместо `union all`, чтобы предотвратить бесконечную рекурсию.
+
+#### Упражнение
+
+1. Измените запрос выше, чтобы использовать `union all` вместо `union` для запуска бесконечной рекурсии. 
+2. Как можно изменить запрос так, чтобы он останавливался на определенной глубине, чтобы можно было проследить его вывод?
+
+**Концептуальная карта: общие табличные выражения (CTE)**
+<img 
+    src="./assets/advanced_cte_concept_map.svg" 
+    alt="Концептуальная карта: общие табличные выражения (CTE)" 
+    style="max-width:100%; height:auto;">
+
