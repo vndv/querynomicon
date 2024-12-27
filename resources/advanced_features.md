@@ -409,16 +409,16 @@ CHECK constraint failed: billable > 0.0
     - `body_mass_g` должен быть неотрицательным.
     - `island` должен быть одним из "Biscoe", "Dream" или "Torgersen". (Подсказка: оператор `in` здесь будет полезен.)
 
-## ACID
-Atomic: change cannot be broken down into smaller ones (i.e., all or nothing)
-Consistent: database goes from one consistent state to another
-Isolated: looks like changes happened one after another
-Durable: if change takes place, it's still there after a restart
+## ACID (Atomicity, Consistency, Isolation, Durability)
 
-Атомарный: изменение нельзя разбить на более мелкие (т. е. все или ничего)
-Согласованность: база данных переходит из одного последовательного состояния в другое
-Изолированный: выглядит так, как будто изменения произошли одно за другим
-Долговременный: если изменение произошло, оно все еще существует после перезапуска
+ACID — это набор свойств транзакций базы данных, гарантирующих надежность и целостность данных при операциях с ними. Аббревиатура ACID расшифровывается как:
+
+- Atomicity (Атомарность): гарантирует, что транзакция будет выполнена целиком или не будет выполнена вовсе. Недопустимы частичные изменения данных. Если в процессе выполнения транзакции происходит ошибка, все изменения, которые успели произойти, отменяются, и база данных возвращается в исходное состояние. Это похоже на неделимую операцию: либо всё, либо ничего.
+- Consistency (Согласованность/Непротиворечивость): гарантирует, что транзакция переводит базу данных из одного согласованного состояния в другое. Согласованное состояние означает, что данные в базе соответствуют всем заданным правилам и ограничениям (например, ограничениям целостности, уникальности и т. д.). Если транзакция нарушает какое-либо из этих правил, она отменяется.
+- Isolation (Изолированность): гарантирует, что параллельные транзакции не влияют друг на друга. Каждая транзакция выполняется так, как будто она является единственной, работающей с базой данных в данный момент. Это предотвращает возникновение ошибок, связанных с одновременным доступом и изменением данных разными транзакциями. Существуют различные уровни изоляции, определяющие степень защиты от таких ошибок.
+- Durability (Стойкость/Надежность): гарантирует, что результаты успешно завершенной транзакции сохраняются в базе данных и не будут потеряны в случае сбоя системы (например, отключения питания). Обычно это достигается путем записи изменений на энергонезависимый носитель (например, жесткий диск).
+
+Простыми словами: ACID гарантирует, что любая операция с базой данных будет выполнена надежно и безопасно. Если вы, например, переводите деньги с одного счета на другой, ACID гарантирует, что деньги будут списаны с первого счета и зачислены на второй, и что эта операция не будет прервана посередине из-за какой-либо ошибки, а так же что результаты этой операции будут сохранены и не потеряются.
 
 ## Транзакции
 
@@ -443,22 +443,14 @@ select * from job;
 | Калибровка | 1.5      |
 ```
 
-Statements outside transaction execute and are committed immediately
-Statement(s) inside transaction don't take effect until:
-end transaction (success)
-rollback (undo)
-Can have any number of statements inside a transaction
-But cannot nest transactions in SQLite
-Other databases support this
-Операторы вне транзакции выполняются и фиксируются немедленно
-Операторы внутри транзакции не вступают в силу до тех пор, пока:
-завершение транзакции (успешное)
-откат (отмена)
-Может иметь любое количество операторов внутри транзакции
-Но не может вкладывать транзакции в SQLite
-Другие базы данных поддерживают это
+- Операторы вне транзакции выполняются и фиксируются в базе немедленно.
+- Операторы внутри транзакции не вступают в силу до тех пор, пока транзакция не будет полностью и успешно завершена или отменена.
+- В транзакции может быть любое количество операторов.
+- Но в SQLite нельзя вкладывать транзакции. (Другие СУБД поддерживают это.)
 
-## Откат в ограничениях
+## Откат в результате ограничения
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/72a1ca04957cfe43afd251b552587723/))
 
 ```sql
 create table job (
@@ -469,6 +461,7 @@ create table job (
 
 insert into job values
     ('Калибровка', 1.5);
+
 insert into job values
     ('Очистка', 0.5),
     ('Сброс', -0.5);
@@ -483,10 +476,11 @@ CHECK constraint failed: billable > 0.0 (19)
 | Калибровка | 1.5      |
 ```
 
-All of second insert rolled back as soon as error occurred
-But first insert took effect
+Второй insert откатился сразу после возникновения ошибки, но первый insert вступил в силу.
 
-## Откат в заявлениях
+## Откат в запросах
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/7e288b6fec3ad8b9239cb36c19bb5f5b/))
 
 ```sql
 create table job (
@@ -500,7 +494,7 @@ insert or rollback into job values
 
 insert or rollback into job values
     ('Очистка', 0.5),
-    ('reset', -0.5);
+    ('Сброс', -0.5);
 
 select * from job;
 ```
@@ -511,31 +505,37 @@ CHECK constraint failed: billable > 0.0 (19)
 |------------|----------|
 | Калибровка | 1.5      |
 ```
-Constraint is in table definition
-Action is in statement
+
+- Ограничения включаются в определение таблицы.
+- Действия включаются в оператор.
 
 ## Upsert
 
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/495404bbccf6adc8bbb3b466393cf99b/))
+
 ```sql
+-- создаем таблицу
 create table jobs_done (
     person text unique,
     num integer default 0
 );
-
+-- вносим данные
 insert into jobs_done values
-    ('zia', 1);
-
+    ('Антон', 1);
+-- проверяем результат
 select * from jobs_done;
 ```
 ```
 | person | num |
 |--------|-----|
-| zia    | 1   |
+| Антон  | 1   |
 ```
 ```sql
+-- вносим данные
 insert into jobs_done values
-    ('zia', 1);
-
+    ('Антон', 1);
+-- получаем ошибку
+-- проверяем результат
 select * from jobs_done;
 ```
 ```
@@ -543,127 +543,135 @@ UNIQUE constraint failed: jobs_done.person (19)
 
 | person | num |
 |--------|-----|
-| zia    | 1   |
+| Антон  | 1   |
 ```
 ```sql
+-- вносим данные используя upsert
 insert into jobs_done values
-    ('zia', 1)
+    ('Антон', 1)
 on conflict(person) do update set num = num + 1;
 
+-- ошибка не возникла
+-- проверяем результат (данные обновились)
 select * from jobs_done;
 ```
 
 ```
 | person | num |
 |--------|-----|
-| zia    | 2   |
+| Антон  | 2   |
 ```
 
-upsert stands for "update or insert"
-Create if record doesn't exist
-Update if it does
-Not standard SQL but widely implemented
-Example also shows use of SQLite .print command
+- upsert расшифровывается как "обновить или вставить" (update or insert).
+- Создает запись, если ее не существует.
+- Обновляет, если существует.
+- Не является стандартом SQL, но широко используется.
 
 #### Упражнение
-1. Using the assay database, write a query that adds or modifies people in the staff table as shown:
+1. Используя базу данных журнала лаборатории, создайте таблицу с именем `staff` с тремя столбцами: `personal`, `family` и `dept`. Столбец `personal` должен быть уникальным. Затем используйте оператор upsert, чтобы добавить или изменить людей в таблице `staff`, как показано:
     ```
-    personal	family	dept	age
-    Pranay	Khanna	mb	41
-    Riaan	Dua	gen	23
-    Parth	Johel	gen	27
-    ```
+    personal    family  dept    age
+    Pranay      Khanna  mb	    41
+    Riaan       Dua     gen	    23
+    Parth	    Johel   gen	    27
+    ``` 
+
 ## Нормализация
 
-First normal form (1NF): every field of every record contains one indivisible value.
-Second normal form (2NF) and third normal form (3NF): every value in a record that isn't a key depends solely on the key, not on other values.
-Denormalization: explicitly store values that could be calculated on the fly to simplify queries and/or make processing faster
+- Нормализация — это процесс организации данных в базе данных.
+- Цель: уменьшить дублирование и избежать аномалий.
+- Первая нормальная форма (1NF): каждое поле каждой записи содержит одно неделимое значение.
+- Вторая нормальная форма (2NF) и третья нормальная форма (3NF): каждое значение в записи, которое не является ключом, зависит исключительно от ключа, а не от других значений.
+- Денормализация: явное хранение значений, которые можно было бы вычислить на лету, чтобы упростить запросы и/или ускорить обработку.
 
 ## Создание триггеров
 
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/b113b9038a7bbe90e5a05be8a31158e0/))
+
 ```sql
--- Track hours of lab work.
+-- создаем таблицу учёта рабочего времени
 create table job (
     person text not null,
     reported real not null check (reported >= 0.0)
 );
 
--- Explicitly store per-person total rather than using sum().
+-- создаем таблицу с общим временем работы
 create table total (
     person text unique not null,
     hours real
 );
 
--- Initialize totals.
-insert into total values
-    ('gene', 0.0),
-    ('august', 0.0);
-
--- Define a trigger.
+-- создаем триггер для обновления таблицы `total`
 create trigger total_trigger
 before insert on job
 begin
-    -- Check that the person exists.
-    select case
-        when not exists (select 1 from total where person = new.person)
-        then raise(rollback, 'Unknown person ')
-    end;
-    -- Update their total hours (or fail if non-negative constraint violated).
-    update total
-    set hours = hours + new.reported
-    where total.person = new.person;
+    insert into total values
+        (new.person, new.reported)
+    on conflict(person) do update set hours = hours + new.reported;
 end;
 ```
 
-A trigger automatically runs before or after a specified operation
-Can have side effects (e.g., update some other table)
-And/or implement checks (e.g., make sure other records exist)
-Add processing overhead…
-…but data is either cheap or correct, never both
-Inside trigger, refer to old and new versions of record as old.column and new.column
+- Триггер — это автоматически выполняемый код, который реагирует на изменения в базе данных.
+- Триггеры могут выполняться до или после операции.
+- Триггеры могут выполняться на вставку, обновление или удаление.
+- Триггеры могут быть использованы для проверки данных, обновления связанных таблиц и многого другого.
+- Триггеры могут быть отключены, включены или удалены.
+- Триггеры могут быть созданы в любой момент, в любой таблице и в любой базе данных.
+- Триггеры могут быть созданы в любой СУБД, но синтаксис может отличаться.
+- Внутри триггера можнообращаться к старой и новой версии записи как old.column и new.column.
 
-## Триггер не срабатывает
-
+## Срабатывание триггера
 ```sql
+-- вносим данные
 insert into job values
-    ('gene', 1.5),
-    ('august', 0.5),
-    ('gene', 1.0);
+    ('Олег', 1.5),
+    ('Сергей', 0.5),
+    ('Олег', 1.0);
+
+-- проверяем результат
+select * from job;
+
+select * from total;
 ```
 ```
 | person | reported |
 |--------|----------|
-| gene   | 1.5      |
-| august | 0.5      |
-| gene   | 1.0      |
+| Олег   | 1.5      |
+| Сергей | 0.5      |
+| Олег   | 1.0      |
 
 | person | hours |
 |--------|-------|
-| gene   | 2.5   |
-| august | 0.5   |
+| Олег   | 2.5   |
+| Сергей | 0.5   |
 ```
+- данные в таблице `total` обновились автоматически.
 
-## Срабатывание триггера
+## Триггер не срабатывает
 
 ```sql
+-- вносим данные
 insert into job values
-    ('gene', 1.0),
-    ('august', -1.0);
+    ('Олег', 1.0),
+    ('Сергей', -1.0);
+
+-- проверяем результат
+select * from job;
+
+select * from total;
 ```
 ```
-Runtime error near line 6: CHECK constraint failed: reported >= 0.0 (19)
+CHECK constraint failed: reported >= 0.0 (19)
 
 | person | hours |
 |--------|-------|
-| gene   | 0.0   |
-| august | 0.0   |
+| Олег   | 0.0   |
+| Сергей | 0.0   |
 ```
+- данные не внесены в таблицу `total` из-за нарушения ограничения.
 
 #### Упражнение
-1. Using the penguins database:
-    - create a table called species with columns name and count; and
-    - define a trigger that increments the count associated with each species each time a new penguin is added to the penguins table.
-    - Does your solution behave correctly when several penguins are added by a single insert statement?
+
 1. Использование базы данных пингвинов:
 - создайте таблицу с именем `species` со столбцами `name` и `count` и
 - определите триггер, который увеличивает счетчик, связанный с каждым видом, каждый раз, когда в таблицу penguins добавляется новый пингвин.
@@ -671,12 +679,15 @@ Runtime error near line 6: CHECK constraint failed: reported >= 0.0 (19)
 
 ## Представление графов
 
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/914fe4ac2fb3b316223c79608bcf4f71/))
+
 ```sql
+-- создаем таблицу родословной
 create table lineage (
     parent text not null,
     child text not null
 );
-
+-- вносим данные
 insert into lineage values
     ('Arturo', 'Clemente'),
     ('Darío', 'Clemente'),
@@ -709,6 +720,8 @@ select * from lineage;
 
 ## Рекурсивные запросы
 
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/393c66e0a9580d88a89f9ef8ed4474d1/))
+
 ```sql
 with recursive descendent as (
     select
@@ -718,7 +731,8 @@ with recursive descendent as (
     select
         lineage.child as person,
         descendent.generations + 1 as generations
-    from descendent inner join lineage
+    from descendent 
+    inner join lineage
         on descendent.person = lineage.parent
 )
 select
@@ -736,20 +750,13 @@ from descendent;
 | Santiago | 3           |
 ```
 
-Use a recursive CTE to create a temporary table (descendent)
-Base case seeds this table
-Recursive case relies on value(s) already in that table and external table(s)
-union all to combine rows
-Can use union but that has lower performance (must check uniqueness each time)
-Stops when the recursive case yields an empty row set (nothing new to add)
-Then select the desired values from the CTE
-Используйте рекурсивное CTE для создания временной таблицы (потомка)
-Базовый случай задает эту таблицу
-Рекурсивный случай опирается на значения, уже находящиеся в этой таблице, и внешние таблицы
-union all для объединения строк
-Можно использовать union, но это имеет более низкую производительность (необходимо проверять уникальность каждый раз)
-Останавливается, когда рекурсивный случай выдает пустой набор строк (нечего нового добавлять)
-Затем выберите нужные значения из CTE
+- Используйте рекурсивное CTE для создания временной таблицы (потомка).
+- Базовый случай задает эту таблицу.
+- Рекурсивный случай опирается на значения, уже находящиеся в этой таблице, и внешние таблицы.
+- Используйте `union all` для объединения строк
+  *Можно использовать `union`, но это имеет более низкую производительность (необходимо проверять уникальность каждый раз)*
+- Рекурсия останавливается, когда рекурсивный случай выдает пустой набор строк (нечего нового добавлять).
+- Затем выберите нужные значения из CTE
 
 #### Упражнение
 
@@ -757,6 +764,8 @@ union all для объединения строк
 2. Влияет ли это на результат? Почему или почему нет?
 
 ## База данных отслеживания контактов
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/7ce208fe11ac9be3fbbb4105304bc5c6/))
 
 ```sql
 select * from person;
@@ -796,42 +805,52 @@ select * from contact;
 | Daniela Menéndez  | Marco Antonio Barrera |
 ```
 
-- Contact Diagram (box and line diagram showing who has had contact with whom)
-<img src="./assets/advanced_recursive_contacts.svg" alt="box and line diagram showing who has had contact with whom" style="max-width:100%; height:auto;">
+**Диаграмма контактов (диаграмма с прямоугольниками и линиями, показывающая, кто с кем контактировал)**
+<img 
+    src="./assets/advanced_recursive_contacts.svg" 
+    alt="Диаграмма контактов (диаграмма с прямоугольниками и линиями, показывающая, кто с кем контактировал)" 
+    style="max-width:100%; height:auto;">
 
-## Двунаправленные контакты
+## Временные таблицы
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/67d427000f1c354777f8701e548a0896/))
 
 ```sql
+-- создаем временную таблицу
 create temporary table bi_contact (
     left text,
     right text
 );
 
+-- вносим данные во временную таблицу на основе данных из таблицы `contact`
 insert into bi_contact
 select
     left, right from contact
     union all
     select right, left from contact
 ;
+-- проверяем результат (данные дублированы)
+select count(*) original_count from contact;
+
+select count(*) num_bi_contacts from bi_contact;
 ```
 ```
 | original_count |
 |----------------|
 | 8              |
 
-| num_contact |
-|-------------|
-| 16          |
+| num_bi_contacts |
+|-----------------|
+| 16              |
 ```
 
-Create a temporary table rather than using a long chain of CTEs
-Only lasts as long as the session (not saved to disk)
-Duplicate information rather than writing more complicated query
-- Создайте временную таблицу вместо использования длинной цепочки CTE
-- Действует только до тех пор, пока длится сеанс (не сохраняется на диске)
-- Дублируйте информацию вместо написания более сложного запроса
+- Создайте временную таблицу вместо использования длинной цепочки CTE.
+- Временная таблица существует только до тех пор, пока длится сеанс (не сохраняется на диске).
+- Дублируйте информацию вместо написания более сложного запроса.
 
 ## Обновление идентификаторов групп
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/9359987da54942c6acf20c431520ea1f/))
 
 ```sql
 select
@@ -911,14 +930,16 @@ order by label, name;
 | Óscar Barrios         | 15       |
 ```
 
-Используйте `union` вместо `union all`, чтобы предотвратить бесконечную рекурсию.
+- Используйте `union` вместо `union all`, чтобы предотвратить бесконечную рекурсию.
 
 #### Упражнение
 
 1. Измените запрос выше, чтобы использовать `union all` вместо `union` для запуска бесконечной рекурсии. 
 2. Как можно изменить запрос так, чтобы он останавливался на определенной глубине, чтобы можно было проследить его вывод?
 
-Check Understanding
-<img src="./assets/advanced_cte_concept_map.svg" alt="box and arrow diagram showing concepts related to common table expressions in SQL" style="max-width:100%; height:auto;">
+**Концептуальная карта: общие табличные выражения (CTE)**
+<img 
+    src="./assets/advanced_cte_concept_map.svg" 
+    alt="Концептуальная карта: общие табличные выражения (CTE)" 
+    style="max-width:100%; height:auto;">
 
-Концептуальная карта: общие табличные выражения (CTE)
