@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Querynomicon - Введение в SQL для осторожных и утомленных.</title>
@@ -7,6 +8,7 @@
   <meta name="description" content="Description">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
   <link rel="stylesheet" href="assets/style.css" />
   <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png">
   <link rel="icon" type="image/png" href="/assets/favicons/favicon-32x32.png" sizes="32x32">
@@ -28,6 +30,7 @@
   <noscript><div><img src="https://mc.yandex.ru/watch/99335325" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
   <!-- /Yandex.Metrika counter -->
 </head>
+
 <body>
   <div id="app"></div>
   <script>
@@ -35,11 +38,10 @@
       name: 'querynomicon',
       repo: 'true',
       corner: {
-        url: "https://github.com/vndv/querynomicon",  
+        url: "https://github.com/vndv/querynomicon",
         icon: "github",
       },
       loadSidebar: true,
-      enableSidebarCollapse: true,
       subMaxLevel: 3,
       coverpage: true,
       externalLinkTarget: '_blank',
@@ -49,7 +51,7 @@
       progress: {
         position: "top",
         color: "var(--theme-color,#42b983)",
-        height: "10px",
+        height: "5px",
       },
       pagination: {
         previousText: 'Назад',
@@ -60,10 +62,14 @@
     }
   </script>
   <!-- Docsify v4 -->
-  <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+  <!-- <script src="//cdn.jsdelivr.net/npm/docsify@4"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify@latest/lib/docsify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify@latest/lib/plugins/search.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify-progress@latest/dist/progress.min.js"></script>
   <script src="//unpkg.com/docsify-pagination/dist/docsify-pagination.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-corner/dist/docsify-corner.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-sql.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
 </body>
+
 </html>
