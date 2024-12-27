@@ -37,22 +37,17 @@
       },
       pagination: {
         previousText: 'Назад',
-        // or
-        nextText: {
-          '/en/': 'NEXT',
-          '/': 'Вперед'
-        },
+        nextText: 'Вперед',
         crossChapter: true,
         crossChapterText: true,
       },
       search: {
-        maxAge: 43200000, // 12h
-        paths: [],
+        //maxAge: 86400000, // Expiration time, the default one day
+        noData: 'Ничего не найдено!',
+        paths: 'auto',
         placeholder: 'Введите для поиска',
-        noData: 'Нет результатов!',
-        depth: 6,
-        hideOtherSidebarContent: true, // whether or not to hide other sidebar content
-      }
+        depth: 3,
+      },
     }
   </script>
   <!-- Docsify v4 -->
