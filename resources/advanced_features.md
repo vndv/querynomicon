@@ -409,16 +409,16 @@ CHECK constraint failed: billable > 0.0
     - `body_mass_g` должен быть неотрицательным.
     - `island` должен быть одним из "Biscoe", "Dream" или "Torgersen". (Подсказка: оператор `in` здесь будет полезен.)
 
-## ACID
-Atomic: change cannot be broken down into smaller ones (i.e., all or nothing)
-Consistent: database goes from one consistent state to another
-Isolated: looks like changes happened one after another
-Durable: if change takes place, it's still there after a restart
+## ACID (Atomicity, Consistency, Isolation, Durability)
 
-Атомарный: изменение нельзя разбить на более мелкие (т. е. все или ничего)
-Согласованность: база данных переходит из одного последовательного состояния в другое
-Изолированный: выглядит так, как будто изменения произошли одно за другим
-Долговременный: если изменение произошло, оно все еще существует после перезапуска
+ACID — это набор свойств транзакций базы данных, гарантирующих надежность и целостность данных при операциях с ними. Аббревиатура ACID расшифровывается как:
+
+- Atomicity (Атомарность): гарантирует, что транзакция будет выполнена целиком или не будет выполнена вовсе. Недопустимы частичные изменения данных. Если в процессе выполнения транзакции происходит ошибка, все изменения, которые успели произойти, отменяются, и база данных возвращается в исходное состояние. Это похоже на неделимую операцию: либо всё, либо ничего.
+- Consistency (Согласованность/Непротиворечивость): гарантирует, что транзакция переводит базу данных из одного согласованного состояния в другое. Согласованное состояние означает, что данные в базе соответствуют всем заданным правилам и ограничениям (например, ограничениям целостности, уникальности и т. д.). Если транзакция нарушает какое-либо из этих правил, она отменяется.
+- Isolation (Изолированность): гарантирует, что параллельные транзакции не влияют друг на друга. Каждая транзакция выполняется так, как будто она является единственной, работающей с базой данных в данный момент. Это предотвращает возникновение ошибок, связанных с одновременным доступом и изменением данных разными транзакциями. Существуют различные уровни изоляции, определяющие степень защиты от таких ошибок.
+- Durability (Стойкость/Надежность): гарантирует, что результаты успешно завершенной транзакции сохраняются в базе данных и не будут потеряны в случае сбоя системы (например, отключения питания). Обычно это достигается путем записи изменений на энергонезависимый носитель (например, жесткий диск).
+
+Простыми словами: ACID гарантирует, что любая операция с базой данных будет выполнена надежно и безопасно. Если вы, например, переводите деньги с одного счета на другой, ACID гарантирует, что деньги будут списаны с первого счета и зачислены на второй, и что эта операция не будет прервана посередине из-за какой-либо ошибки, а так же что результаты этой операции будут сохранены и не потеряются.
 
 ## Транзакции
 
@@ -443,22 +443,14 @@ select * from job;
 | Калибровка | 1.5      |
 ```
 
-Statements outside transaction execute and are committed immediately
-Statement(s) inside transaction don't take effect until:
-end transaction (success)
-rollback (undo)
-Can have any number of statements inside a transaction
-But cannot nest transactions in SQLite
-Other databases support this
-Операторы вне транзакции выполняются и фиксируются немедленно
-Операторы внутри транзакции не вступают в силу до тех пор, пока:
-завершение транзакции (успешное)
-откат (отмена)
-Может иметь любое количество операторов внутри транзакции
-Но не может вкладывать транзакции в SQLite
-Другие базы данных поддерживают это
+- Операторы вне транзакции выполняются и фиксируются в базе немедленно.
+- Операторы внутри транзакции не вступают в силу до тех пор, пока транзакция не будет полностью и успешно завершена или отменена.
+- В транзакции может быть любое количество операторов.
+- Но в SQLite нельзя вкладывать транзакции. (Другие СУБД поддерживают это.)
 
-## Откат в ограничениях
+## Откат в результате ограничения
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/72a1ca04957cfe43afd251b552587723/))
 
 ```sql
 create table job (
@@ -469,6 +461,7 @@ create table job (
 
 insert into job values
     ('Калибровка', 1.5);
+
 insert into job values
     ('Очистка', 0.5),
     ('Сброс', -0.5);
@@ -483,10 +476,11 @@ CHECK constraint failed: billable > 0.0 (19)
 | Калибровка | 1.5      |
 ```
 
-All of second insert rolled back as soon as error occurred
-But first insert took effect
+Второй insert откатился сразу после возникновения ошибки, но первый insert вступил в силу.
 
-## Откат в заявлениях
+## Откат в запросах
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/7e288b6fec3ad8b9239cb36c19bb5f5b/))
 
 ```sql
 create table job (
@@ -511,20 +505,24 @@ CHECK constraint failed: billable > 0.0 (19)
 |------------|----------|
 | Калибровка | 1.5      |
 ```
-Constraint is in table definition
-Action is in statement
+
+- Ограничения включаются в определение таблицы.
+- Действия включаются в оператор.
 
 ## Upsert
 
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/495404bbccf6adc8bbb3b466393cf99b/))
+
 ```sql
+-- создаем таблицу
 create table jobs_done (
     person text unique,
     num integer default 0
 );
-
+-- вносим данные
 insert into jobs_done values
-    ('zia', 1);
-
+    ('Антон', 1);
+-- проверяем результат
 select * from jobs_done;
 ```
 ```
@@ -533,9 +531,11 @@ select * from jobs_done;
 | zia    | 1   |
 ```
 ```sql
+-- вносим данные
 insert into jobs_done values
-    ('zia', 1);
-
+    ('Антон', 1);
+-- получаем ошибку
+-- проверяем результат
 select * from jobs_done;
 ```
 ```
@@ -546,10 +546,13 @@ UNIQUE constraint failed: jobs_done.person (19)
 | zia    | 1   |
 ```
 ```sql
+-- вносим данные используя upsert
 insert into jobs_done values
-    ('zia', 1)
+    ('Антон', 1)
 on conflict(person) do update set num = num + 1;
 
+-- ошибка не возникла
+-- проверяем результат (данные обновились)
 select * from jobs_done;
 ```
 
@@ -559,20 +562,20 @@ select * from jobs_done;
 | zia    | 2   |
 ```
 
-upsert stands for "update or insert"
-Create if record doesn't exist
-Update if it does
-Not standard SQL but widely implemented
-Example also shows use of SQLite .print command
+- upsert расшифровывается как "обновить или вставить" (update or insert).
+- Создает запись, если ее не существует.
+- Обновляет, если существует.
+- Не является стандартом SQL, но широко используется.
 
 #### Упражнение
-1. Using the assay database, write a query that adds or modifies people in the staff table as shown:
+1. Используя базу данных журнала лаборатории, создайте таблицу с именем `staff` с тремя столбцами: `personal`, `family` и `dept`. Столбец `personal` должен быть уникальным. Затем используйте оператор upsert, чтобы добавить или изменить людей в таблице `staff`, как показано:
     ```
-    personal	family	dept	age
-    Pranay	Khanna	mb	41
-    Riaan	Dua	gen	23
-    Parth	Johel	gen	27
-    ```
+    personal    family  dept    age
+    Pranay      Khanna  mb	    41
+    Riaan       Dua     gen	    23
+    Parth	    Johel   gen	    27
+    ``` 
+
 ## Нормализация
 
 First normal form (1NF): every field of every record contains one indivisible value.
