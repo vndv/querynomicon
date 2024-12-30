@@ -31,28 +31,3 @@ jobs:
         with:
           file_or_dir: .
           config_file: .yamllint.yml
-
-  sitemap_job:
-    runs-on: ubuntu-latest
-    name: Generate a sitemap
-
-    steps:
-    - name: Checkout the repo
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0 
-
-    - name: Generate the sitemap
-      uses: cicirello/generate-sitemap@v1
-      with:
-        base-url-path: https://www.example.com/
-
-    - name: Commit and push
-      run: |
-        if [[ `git status --porcelain sitemap.xml` ]]; then
-          git config --global user.name 'github-actions'
-          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add sitemap.xml
-          git commit -m "Automated sitemap update" sitemap.xml
-          git push
-        fi
