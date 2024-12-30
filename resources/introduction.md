@@ -55,7 +55,12 @@
 - К сожалению, у каждой РСУБД свой диалект SQL.
 - Существуют также NoSQL базы данных, как MongoDB, которые не используют таблицы.
 
- <img src="./assets/asset1.jpeg" alt="Базовые концепции" style="max-width:100%; height:auto;">
+## Концептуальная карта
+
+
+ <img src="./assets/concept_map.svg" alt="Базовые концепции" style="max-width:100%; height:auto;">
+
+
 
 ## Подключение к базе данных
 
