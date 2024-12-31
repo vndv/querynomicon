@@ -923,3 +923,96 @@ limit 5;
 
 Что вернет выражение  `date('now', 'start of month', '+1 month', '-1 day')`? (Вам может оказаться полезной документация по функциям даты и времени SQLite.)
  
+### Генерация уникальных пар (используем самосоединение)
+
+```sql
+with person as (
+    -- получаем данные
+    select
+        ident,
+        personal || ' ' || family as name
+    from staff
+)
+select
+    left_person.name,
+    right_person.name
+from person as left_person 
+inner join person as right_person -- используем самосоединение
+    on left_person.ident < right_person.ident -- за исключением идентичных пар
+order by -- сортируем
+    left_person.name asc,
+    right_person.name asc
+;
+```
+
+([онлайн sql песочница](https://sqlize.online/sql/sqlite3_data/abacb55ac4dd1d852dc1efa0405a0487/))
+
+```
+| name             | name             |
+|------------------|------------------|
+| Abram Chokshi    | Ishaan Ramaswamy |
+| Abram Chokshi    | Nitya Lal        |
+| Abram Chokshi    | Romil Kapoor     |
+| Divit Dhaliwal   | Abram Chokshi    |
+| ...              | ...              |
+| Vedika Rout      | Abram Chokshi    |
+| Vedika Rout      | Ishaan Ramaswamy |
+| Vedika Rout      | Nitya Lal        |
+| Vedika Rout      | Romil Kapoor     |
+```
+
+- условие `left.ident < right.ident` обеспечивает различные пары без дубликатов.
+
+### Фильтрация пар
+
+Найдём пары сотрудников работающие над общим экспериментом. 
+
+```sql
+with
+person as (
+    -- получаем список сотрудников
+    select
+        ident,
+        personal || ' ' || family as name
+    from staff
+),
+together as (
+    -- пары сотрудников работающие над общим экспериментом
+    select
+        left_perf.staff as left_staff,
+        right_perf.staff as right_staff
+    from performed as left_perf 
+    inner join performed as right_perf
+        on left_perf.experiment = right_perf.experiment
+    where left_staff < right_staff
+)
+select
+    left_person.name as person_1,
+    right_person.name as person_2
+from person as left_person 
+inner join person as right_person 
+inner join together
+    on left_person.ident = left_staff and right_person.ident = right_staff;
+```
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/ecdd4df71c7daa33133c385b39921160/))
+
+```
+|    person_1     |     person_2     |
+|-----------------|------------------|
+| Kartik Gupta    | Vedika Rout      |
+| Pranay Khanna   | Vedika Rout      |
+| Indrans Sridhar | Romil Kapoor     |
+| Abram Chokshi   | Ishaan Ramaswamy |
+| Pranay Khanna   | Vedika Rout      |
+| Kartik Gupta    | Abram Chokshi    |
+| Abram Chokshi   | Romil Kapoor     |
+| Kartik Gupta    | Divit Dhaliwal   |
+| Divit Dhaliwal  | Abram Chokshi    |
+| Pranay Khanna   | Ishaan Ramaswamy |
+| Indrans Sridhar | Romil Kapoor     |
+| Kartik Gupta    | Ishaan Ramaswamy |
+| Kartik Gupta    | Nitya Lal        |
+| Kartik Gupta    | Abram Chokshi    |
+| Pranay Khanna   | Romil Kapoor     |
+```
