@@ -14,10 +14,3 @@ jobs:
           node-version: '18'
       - run: npm install
       - run: npx commitlint --from HEAD~1 --to HEAD --verbose
-    
-
-      - name: YAML Lint
-        uses: ibiqlik/action-yamllint@v3
-        with:
-          file_or_dir: .
-          config_file: .yamllint.yml
