@@ -15,7 +15,8 @@ module.exports = {
           'refactor',
           'revert',
           'style',
-          'test'
+          'test',
+          'input'
         ]
       ],
       'type-case': [2, 'always', 'lower-case'],
