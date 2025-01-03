@@ -1,4 +1,4 @@
-> Список терминов: [Атомарный (atomic)](/resources/glossary.md?id=Атомарный-atomic), [Базовый случай (base-case)](/resources/glossary.md?id=Базовый-случай-base-case), [Бесконечная рекурсия (infinite recursion)](/resources/glossary.md?id=Бесконечная-рекурсия-infinite-recursion), [Большой двоичный объект (binary large object BLOB)](/resources/glossary.md?id=Большой-двоичный-объект-binary-large-object-blob), [Временная таблица (temporary table)](/resources/glossary.md?id=Временная-таблица-temporary-table), [Денормализация (denormalization)](/resources/glossary.md?id=Денормализация-denormalization), [Долговечнось (durable)](/resources/glossary.md?id=Долговечнось-durable), [Значения разделенные запятыми (csv)](/resources/glossary.md?id=Значения-разделенные-запятыми-csv), [Изолированный (isolated)](/resources/glossary.md?id=Изолированный-isolated), [Javascript Object Notation (JSON)](/resources/glossary.md?id=javascript-object-notation-json), [Материализованное представление (materialized view)](/resources/glossary.md?id=Материализованное-представление-materialized-view), [Нормальная форма (normal form)](/resources/glossary.md?id=Нормальная-форма-normal-form), [Представление (view)](/resources/glossary.md?id=Представление-view), [Путь (path expression)](/resources/glossary.md?id=Путь-path-expression), [Рекурсивное табличное выражение (recursive cte)](/resources/glossary.md?id=Рекурсивное-табличное-выражение-recursive-cte), [Рекурсивный случай (recursive case)](/resources/glossary.md?id=Рекурсивный-случай-recursive-case), [Триггер (trigger)](/resources/glossary.md?id=Триггер-trigger), [UPSERT](/resources/glossary.md?id=UPSERT)
+> Список терминов: [Базовый случай (base-case)](/resources/glossary.md?id=Базовый-случай-base-case), [Бесконечная рекурсия (infinite recursion)](/resources/glossary.md?id=Бесконечная-рекурсия-infinite-recursion), [Большой двоичный объект (binary large object BLOB)](/resources/glossary.md?id=Большой-двоичный-объект-binary-large-object-blob), [Временная таблица (temporary table)](/resources/glossary.md?id=Временная-таблица-temporary-table), [Javascript Object Notation (JSON)](/resources/glossary.md?id=javascript-object-notation-json), [Материализованное представление (materialized view)](/resources/glossary.md?id=Материализованное-представление-materialized-view), [Представление (view)](/resources/glossary.md?id=Представление-view), [Путь (path expression)](/resources/glossary.md?id=Путь-path-expression), [Рекурсивное табличное выражение (recursive cte)](/resources/glossary.md?id=Рекурсивное-табличное-выражение-recursive-cte), [Рекурсивный случай (recursive case)](/resources/glossary.md?id=Рекурсивный-случай-recursive-case), [Триггер (trigger)](/resources/glossary.md?id=Триггер-trigger), [UPSERT](/resources/glossary.md?id=UPSERT)
 
 
 ## Большой двоичный объект (binary large object BLOB)
@@ -265,36 +265,6 @@ group by species;
 - Используйте `tombstone` для обозначения (не)активных записей
 - Теперь каждый запрос должен включать его в условие.
 
-## Импорт CSV файлов
-
-- SQLite и большинство других СУБД имеют инструменты для импорта и экспорта CSV.
-- Процесс импорта в SQLite:
-    1. Определение таблицы
-    2. Импорт данных
-    3. Преобразование пустых строк в значения NULL (при нелбходимости).
-    4. Преобразование типов из текста в любые (не показано ниже).
-
-```sql
-drop table if exists penguins;
-
-.mode csv penguins
-.import misc/penguins.csv penguins
-
--- конвертируем пустые строки в null
-update penguins set species = null where species = '';
-update penguins set island = null where island = '';
-update penguins set bill_length_mm = null where bill_length_mm = '';
-update penguins set bill_depth_mm = null where bill_depth_mm = '';
-update penguins set flipper_length_mm = null where flipper_length_mm = '';
-update penguins set body_mass_g = null where body_mass_g = '';
-update penguins set sex = null where sex = '';
-```
-
-#### Упражнение
-
-1. Каковы будут типы данных столбцов в таблице `penguins`, созданной с помощью импорта CSV, показанного выше? 
-2. Как можно исправить те, которые требуют исправления?
-
 ## Представления (views)
 
 ```sql
@@ -408,17 +378,6 @@ CHECK constraint failed: billable > 0.0
 1. Перепишите определение таблицы `penguins`, добавив следующие ограничения:
     - `body_mass_g` должен быть неотрицательным.
     - `island` должен быть одним из "Biscoe", "Dream" или "Torgersen". (Подсказка: оператор `in` здесь будет полезен.)
-
-## ACID (Atomicity, Consistency, Isolation, Durability)
-
-ACID — это набор свойств транзакций базы данных, гарантирующих надежность и целостность данных при операциях с ними. Аббревиатура ACID расшифровывается как:
-
-- Atomicity (Атомарность): гарантирует, что транзакция будет выполнена целиком или не будет выполнена вовсе. Недопустимы частичные изменения данных. Если в процессе выполнения транзакции происходит ошибка, все изменения, которые успели произойти, отменяются, и база данных возвращается в исходное состояние. Это похоже на неделимую операцию: либо всё, либо ничего.
-- Consistency (Согласованность/Непротиворечивость): гарантирует, что транзакция переводит базу данных из одного согласованного состояния в другое. Согласованное состояние означает, что данные в базе соответствуют всем заданным правилам и ограничениям (например, ограничениям целостности, уникальности и т. д.). Если транзакция нарушает какое-либо из этих правил, она отменяется.
-- Isolation (Изолированность): гарантирует, что параллельные транзакции не влияют друг на друга. Каждая транзакция выполняется так, как будто она является единственной, работающей с базой данных в данный момент. Это предотвращает возникновение ошибок, связанных с одновременным доступом и изменением данных разными транзакциями. Существуют различные уровни изоляции, определяющие степень защиты от таких ошибок.
-- Durability (Стойкость/Надежность): гарантирует, что результаты успешно завершенной транзакции сохраняются в базе данных и не будут потеряны в случае сбоя системы (например, отключения питания). Обычно это достигается путем записи изменений на энергонезависимый носитель (например, жесткий диск).
-
-Простыми словами: ACID гарантирует, что любая операция с базой данных будет выполнена надежно и безопасно. Если вы, например, переводите деньги с одного счета на другой, ACID гарантирует, что деньги будут списаны с первого счета и зачислены на второй, и что эта операция не будет прервана посередине из-за какой-либо ошибки, а так же что результаты этой операции будут сохранены и не потеряются.
 
 ## Транзакции
 
@@ -575,14 +534,6 @@ select * from jobs_done;
     Riaan       Dua     gen	    23
     Parth	    Johel   gen	    27
     ``` 
-
-## Нормализация
-
-- Нормализация — это процесс организации данных в базе данных.
-- Цель: уменьшить дублирование и избежать аномалий.
-- Первая нормальная форма (1NF): каждое поле каждой записи содержит одно неделимое значение.
-- Вторая нормальная форма (2NF) и третья нормальная форма (3NF): каждое значение в записи, которое не является ключом, зависит исключительно от ключа, а не от других значений.
-- Денормализация: явное хранение значений, которые можно было бы вычислить на лету, чтобы упростить запросы и/или ускорить обработку.
 
 ## Создание триггеров
 

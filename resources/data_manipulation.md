@@ -1,3 +1,5 @@
+> Список терминов: [Значения разделенные запятыми (csv)](/resources/glossary.md?id=Значения-разделенные-запятыми-csv), 
+
 # Управление данными в базе
 
 ## Создание новых таблиц из старых
@@ -293,3 +295,38 @@ UNIQUE constraint failed: person.ident
 4. Недостаток: ручные запросы труднее читать (кто такой человек 17?)
 
 ## Внешние ключи
+
+## Импорт CSV файлов
+
+- CSV (Comma Separated Values - данные разделённые запятой) - один из популярных форматов хранения данных.
+- Каждая строка файла представляет собой одну запись, а столбцы разделены запятыми.
+- SQLite и большинство других СУБД имеют инструменты для импорта и экспорта CSV.
+
+### Процесс импорта в SQLite:
+1. Определение таблицы
+2. Импорт данных
+3. Преобразование пустых строк в значения NULL (при нелбходимости).
+4. Преобразование типов из текста в любые (не показано ниже).
+
+```sql
+-- удаляем таблицу, если она существует
+drop table if exists penguins;
+
+-- импортируем данные из CSV файла
+.mode csv penguins
+.import misc/penguins.csv penguins
+
+-- конвертируем пустые строки в null
+update penguins set species = null where species = '';
+update penguins set island = null where island = '';
+update penguins set bill_length_mm = null where bill_length_mm = '';
+update penguins set bill_depth_mm = null where bill_depth_mm = '';
+update penguins set flipper_length_mm = null where flipper_length_mm = '';
+update penguins set body_mass_g = null where body_mass_g = '';
+update penguins set sex = null where sex = '';
+```
+
+#### Упражнение
+
+1. Каковы будут типы данных столбцов в таблице `penguins`, созданной с помощью импорта CSV, показанного выше? 
+2. Как можно исправить те, которые требуют исправления?
