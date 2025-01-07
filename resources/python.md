@@ -1,6 +1,6 @@
 # Python
 
-> Список терминов: cursor, object-relational mapper (ORM), Uniform Resource Identifier (URI)
+> Список терминов: [Курсор (cursor)](/resources/glossary.md?id=Курсор-cursor), [Объектно-реляционная модель (Object-Relational Mapper, ORM)](/resources/glossary.md?id=Объектно-реляционная-модель-object-relational-mapper-orm), [Стандартный идентификатор ресурса (Uniform Resource Identifier - URI)](/resources/glossary.md?id=Объектно-реляционная-модель-object-relational-mapper-orm)
 
 ## Запросы из Python
 
