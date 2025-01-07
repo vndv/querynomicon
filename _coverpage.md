@@ -6,8 +6,6 @@
 
 > Введение в SQL для начинающих и нетерпеливых
 
-> #### При поддержке [SQLize](https://sqlize.online) и [SQLTest](https://sqltest.online/ru)
-
 [GitHub](https://github.com/vndv/querynomicon)
 [Начать](README.md)
 
