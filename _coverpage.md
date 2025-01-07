@@ -12,4 +12,4 @@
 
 ![color](#f0f0f0)
 
-При поддержке [SQlize Online](https://sqlize.online) и [SQLTest](https://sqltest.online/ru)
+#### При поддержке [SQlize Online](https://sqlize.online) и [SQLTest](https://sqltest.online/ru)
