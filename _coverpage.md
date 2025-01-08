@@ -1,14 +1,13 @@
 <!-- _coverpage.md -->
 
-[SQlize Online](https://sqlize.online)
 
 
 # Querynomicon <small>3.5</small>
 
->An Introduction to SQL for Weary Data Scientists
-
+> Введение в SQL для начинающих и нетерпеливых
 
 [GitHub](https://github.com/vndv/querynomicon)
-[Get Started](README.md)
+[Начать](README.md)
 
 ![color](#f0f0f0)
+
