@@ -75,11 +75,6 @@
     border-bottom-right-radius: 0;
     margin: 0;
     font-weight: 400;
-    -webkit-letter-spacing: 0.1em;
-    -moz-letter-spacing: 0.1em;
-    -ms-letter-spacing: 0.1em;
-    letter-spacing: 0.1em;
-    /* text-transform: uppercase; */
     color: inherit;
 }
 
