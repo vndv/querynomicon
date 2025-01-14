@@ -472,16 +472,16 @@ limit 3;
 
 <sup>*</sup> *Вы можете использовать || оператор для объединения текста для решения части 1 или посмотрите документацию по функции [SQLite format()](https://sqlite.org/printf.html).*
 
-### SELECT: концептуальная схема
+## SELECT: концептуальная схема
 
-<img src="./assets/select_concept_map.svg" alt="концептуальная схема" style="max-width:100%; height:auto;">
+<img src="./assets/select_concept_map.svg" alt="SELECT: концептуальная схема" style="max-width:100%; height:auto;">
 
 ## Отсутствующие значения (null)
 
 - SQL использует специальное значение `null` для представления отсутствующих данных.
 - `null` это не 0 или пустая строка, а «Я не знаю».
 
-## Вычисления с `null`
+### Вычисления с `null`
 
 ([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/05bde8ecc4459418c669e0637deb290d/))
 
