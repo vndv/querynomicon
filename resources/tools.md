@@ -560,45 +560,6 @@ order by species, num;
 
 Измените приведенный выше запрос так, чтобы выходные данные были «пингвин маленький» и «пингвин большой», объединив строку «пингвин есть» со всем регистром, а не с отдельными ответвлениями. (Это упражнение показывает, что `CASE/WHEN` является выражением, а не утверждением.)
 
-### Проверка диапазона
-
-```sql
-with sized_penguins as (
-    select
-        species,
-        case
-            when body_mass_g between 3500 and 5000 then 'normal'
-            else 'abnormal'
-        end as size
-    from penguins
-    where body_mass_g is not null
-)
-select
-    species,
-    size,
-    count(*) as num
-from sized_penguins
-group by species, size
-order by species, num;
-```
-```
-|  species  |   size   | num |
-|-----------|----------|-----|
-| Adelie    | abnormal | 54  |
-| Adelie    | normal   | 97  |
-| Chinstrap | abnormal | 17  |
-| Chinstrap | normal   | 51  |
-| Gentoo    | abnormal | 61  |
-| Gentoo    | normal   | 62  |
-```
-
-1. `BETWEEN` может облегчить чтение запросов
-2. Будьте внимательны с когда указываете диапазон в `BETWEEN`
-
-#### Упражнения
-
-1. Выражение val между «A» и «Z» истинно, если val равно «M» (верхний регистр), но ложно, если val равно «m» (нижний регистр). Перепишите выражение, используя встроенные скалярные функции SQLite, чтобы оно было истинным в обоих случаях.
-
 ### Функции работы со строками
 
 | **функция**	| **назначение** |
