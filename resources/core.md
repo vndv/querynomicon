@@ -347,42 +347,37 @@ SQLite будет принимать текстовые данные в двой
 
 ### Проверка диапазона
 
+ВЫберем из таблицы `little_penguins` пингвинов с массой тела от 3001 до 4000 граммов. Воспользуемся оператором `between` для фильтрации строк по диапвзону значений.
+
+(выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/cfe4a9988245725a13ea7eb0965f6b2b/))
+
 ```sql
-with sized_penguins as (
-    select
-        species,
-        case
-            when body_mass_g between 3500 and 5000 then 'normal'
-            else 'abnormal'
-        end as size
-    from penguins
-    where body_mass_g is not null
-)
-select
-    species,
-    size,
-    count(*) as num
-from sized_penguins
-group by species, size
-order by species, num;
+select 
+    species, island -- выбираем вид и остров
+from little_penguins -- из таблицы little_penguins
+where body_mass_g between 3001 and 4000; -- масса тела которых находится в диапазоне от 3001 до 4000 граммов
 ```
 ```
-|  species  |   size   | num |
-|-----------|----------|-----|
-| Adelie    | abnormal | 54  |
-| Adelie    | normal   | 97  |
-| Chinstrap | abnormal | 17  |
-| Chinstrap | normal   | 51  |
-| Gentoo    | abnormal | 61  |
-| Gentoo    | normal   | 62  |
+|-----------|-----------|
+| species   | island    |
+|-----------|-----------|
+| Adelie    | Dream     |
+| Adelie    | Torgersen |
+| Chinstrap | Dream     |
+| Adelie    | Dream     |
+| Adelie    | Dream     |
+| Adelie    | Dream     |
+| Adelie    | Torgersen |
 ```
 
-1. `BETWEEN` может облегчить чтение запросов
-2. Будьте внимательны с когда указываете диапазон в `BETWEEN`
+1. Условие `x between a and b` аналогично `x >= a and x <= b`.
+2. Использование `between` может облегчить чтение запросов.
+3. Будьте внимательны с когда указываете диапазон в `between` - включает ли он границы или нет.
 
 #### Упражнения
 
-1. Выражение val между «A» и «Z» истинно, если val равно «M» (верхний регистр), но ложно, если val равно «m» (нижний регистр). Перепишите выражение, используя встроенные скалярные функции SQLite, чтобы оно было истинным в обоих случаях.
+1. [Найдите пингвинов с длиной клюва от 30 до 39 мм.](https://sqltest.online/ru/question/sqlite/medium-bill-penguins)
+2. Выражение val между «A» и «Z» истинно, если val равно «M» (верхний регистр), но ложно, если val равно «m» (нижний регистр). Перепишите выражение, используя встроенные скалярные функции SQLite, чтобы оно было истинным в обоих случаях.
 
 ### Комбинация условий
 
