@@ -560,56 +560,21 @@ order by species, num;
 
 Измените приведенный выше запрос так, чтобы выходные данные были «пингвин маленький» и «пингвин большой», объединив строку «пингвин есть» со всем регистром, а не с отдельными ответвлениями. (Это упражнение показывает, что `CASE/WHEN` является выражением, а не утверждением.)
 
-### Проверка диапазона
+### Функции работы со строками
 
-```sql
-with sized_penguins as (
-    select
-        species,
-        case
-            when body_mass_g between 3500 and 5000 then 'normal'
-            else 'abnormal'
-        end as size
-    from penguins
-    where body_mass_g is not null
-)
-select
-    species,
-    size,
-    count(*) as num
-from sized_penguins
-group by species, size
-order by species, num;
-```
-```
-|  species  |   size   | num |
-|-----------|----------|-----|
-| Adelie    | abnormal | 54  |
-| Adelie    | normal   | 97  |
-| Chinstrap | abnormal | 17  |
-| Chinstrap | normal   | 51  |
-| Gentoo    | abnormal | 61  |
-| Gentoo    | normal   | 62  |
-```
+| **функция**	| **назначение** |
+|---------------|----------------|
+| `substr`	    | Получить подстроку, задав начальную позицию и длину
+| `trim`	    | Удалить символы с начала и конца строки
+| `ltrim`	    | Удалить символы с начала строки
+| `rtrim`	    | Удалить символы с конца строки
+| `length`	    | Длина строки
+| `replace`     | Заменить вхождения подстроки другой строкой
+| `upper`	    | Вернуть строку в верхнем регистре
+| `lower`	    | Вернуть строку в нижнем регистре
+| `instr`	    | Найти позицию первого вхождения подстроки (возвращает 0, если не найдено)
 
-1. `BETWEEN` может облегчить чтение запросов
-2. Будьте внимательны с когда указываете диапазон в `BETWEEN`
-
-#### Упражнения
-
-1. Выражение val между «A» и «Z» истинно, если val равно «M» (верхний регистр), но ложно, если val равно «m» (нижний регистр). Перепишите выражение, используя встроенные скалярные функции SQLite, чтобы оно было истинным в обоих случаях.
-
-|**name**	|**purpose**|
-|-----------|-----------|
-|substr	    |Get substring given starting point and length
-|trim	    |Remove characters from beginning and end of string
-|ltrim	    |Remove characters from beginning of string
-|rtrim	    |Remove characters from end of string
-|length	    |Length of string
-|replace    |Replace occurrences of substring with another string
-|upper	    |Return upper-case version of string
-|lower	    |Return lower-case version of string
-|instr	    |Find location of first occurrence of substring (returns 0 if not found)
+- Полный список функций можно найти в [документации](https://www.sqlite.org/lang_corefunc.html)
 
 
 ## Еще одна база данных
