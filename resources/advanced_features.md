@@ -585,10 +585,12 @@ create table total (
 
 -- создаем триггер для обновления таблицы `total`
 create trigger total_trigger
-before insert on job
+before insert -- триггер срабатывает перед вставкой
+on job -- в таблицу job
 begin
+    -- код который выполняется при срабатывании триггера
     insert into total values
-        (new.person, new.reported)
+        (new.person, new.reported) -- new - обозначает значения из вставляемой строки
     on conflict(person) do update set hours = hours + new.reported;
 end;
 ```
