@@ -208,315 +208,6 @@ order by name;
 
 - Соединение может быть быстрее, а может и нет чем коррелированный подзапрос. Истинна определяется практикой.
 
-## Производные таблицы
-
-### Временные таблицы
-
-([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/67d427000f1c354777f8701e548a0896/))
-
-```sql
--- создаем временную таблицу
-create temporary table bi_contact (
-    left text,
-    right text
-);
-
--- вносим данные во временную таблицу на основе данных из таблицы `contact`
-insert into bi_contact
-select
-    left, right from contact
-    union all
-    select right, left from contact
-;
--- проверяем результат (данные дублированы)
-select count(*) original_count from contact;
-
-select count(*) num_bi_contacts from bi_contact;
-```
-```
-| original_count |
-|----------------|
-| 8              |
-
-| num_bi_contacts |
-|-----------------|
-| 16              |
-```
-
-- Создайте временную таблицу вместо использования длинной цепочки CTE.
-- Временная таблица существует только до тех пор, пока длится сеанс (не сохраняется на диске).
-- Дублируйте информацию вместо написания более сложного запроса.
-
-### Представления (views)
-
-```sql
-create view if not exists
-active_penguins (
-    species,
-    island,
-    bill_length_mm,
-    bill_depth_mm,
-    flipper_length_mm,
-    body_mass_g,
-    sex
-) as
-select
-    species,
-    island,
-    bill_length_mm,
-    bill_depth_mm,
-    flipper_length_mm,
-    body_mass_g,
-    sex
-from penguins
-where active;
-
-select
-    species,
-    count(*) as num
-from active_penguins;
-group by species;
-```
-```
-|  species  | num |
-|-----------|-----|
-| Chinstrap | 68  |
-| Gentoo    | 124 |
-```
-
-- Представление — это сохраненный запрос, который могут вызывать другие запросы.
-- Представление вычисляется каждый раз при использовании.
-- Похоже на CTE, но:
-    - Может совместно использоваться запросами.
-    - Представления в SQL появились первыми. CTE относительно новый инструмент.
-    - Некоторые СУБД предлагают материализованные представления - временные таблицы с обновлением по требованию.
-
-#### Упражнение
-
-1. Создайте представление в базе данных журнала лаборатории под названием `busy` с двумя столбцами: `machine_id` и `total_log_length`. В первом столбце пердставьте числовой идентификатор каждой машины; во втором - общее количество записей журнала для этой машины.
-
-
-### Общие табличные выражения  (Common Table Expression, CTE)
-
-```sql
-with grouped as (
-    select
-        species,
-        avg(body_mass_g) as avg_mass_g
-    from penguins
-    group by species
-)
-
-select
-    penguins.species,
-    penguins.body_mass_g,
-    round(grouped.avg_mass_g, 1) as avg_mass_g
-from penguins inner join grouped
-where penguins.body_mass_g > grouped.avg_mass_g
-limit 5;
-```
-```
-| species | body_mass_g | avg_mass_g |
-|---------|-------------|------------|
-| Adelie  | 3750.0      | 3700.7     |
-| Adelie  | 3800.0      | 3700.7     |
-| Adelie  | 4675.0      | 3700.7     |
-| Adelie  | 4250.0      | 3700.7     |
-| Adelie  | 3800.0      | 3700.7     |
-```
-
-- Используйте общее табличное выражение (CTE), чтобы сделать запросы более понятными.
-- Вложенные подзапросы быстро становятся трудными для понимания.
-- База данных решает, как оптимизировать запрос.
-
-### Проверка знаний
-
-<img src="./assets/advanced_temp_concept_map.svg" alt="Проверка знаний" style="max-width:100%; height:auto;">
-
-### Рекурсивные запросы
-
-([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/393c66e0a9580d88a89f9ef8ed4474d1/))
-
-```sql
-with recursive descendent as (
-    select
-        'Clemente' as person,
-        0 as generations
-    union all
-    select
-        lineage.child as person,
-        descendent.generations + 1 as generations
-    from descendent 
-    inner join lineage
-        on descendent.person = lineage.parent
-)
-select
-    person,
-    generations
-from descendent;
-```
-```
-|  person  | generations |
-|----------|-------------|
-| Clemente | 0           |
-| Homero   | 1           |
-| Ivonne   | 1           |
-| Lourdes  | 2           |
-| Santiago | 3           |
-```
-
-- Используйте рекурсивное CTE для создания временной таблицы (потомка).
-- Базовый случай задает эту таблицу.
-- Рекурсивный случай опирается на значения, уже находящиеся в этой таблице, и внешние таблицы.
-- Используйте `union all` для объединения строк
-  *Можно использовать `union`, но это имеет более низкую производительность (необходимо проверять уникальность каждый раз)*
-- Рекурсия останавливается, когда рекурсивный случай выдает пустой набор строк (нечего нового добавлять).
-- Затем выберите нужные значения из CTE
-
-#### Упражнение
-
-1. Измените рекурсивный запрос, показанный выше, чтобы использовать `union` вместо `union all`. 
-2. Влияет ли это на результат? Почему или почему нет?
-
-## Оконные функции
-
-([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/7a70450164ab33995277a98693f55f0b/))
-
-```sql
-with ym_num as (
-    select
-        strftime('%Y-%m', started) as ym,
-        count(*) as num
-    from experiment
-    group by ym
-)
-select
-    ym,
-    num,
-    sum(num) over (order by ym) as num_done,
-    (sum(num) over (order by ym) * 1.00) / (select sum(num) from ym_num) as completed_progress, 
-    cume_dist() over (order by ym) as linear_progress
-from ym_num
-order by ym;
-```
-```
-|   ym    | num | num_done | completed_progress |  linear_progress   |
-|---------|-----|----------|--------------------|--------------------|
-| 2023-01 | 2   | 2        | 0.04               | 0.0769230769230769 |
-| 2023-02 | 5   | 7        | 0.14               | 0.153846153846154  |
-| 2023-03 | 5   | 12       | 0.24               | 0.230769230769231  |
-| 2023-04 | 1   | 13       | 0.26               | 0.307692307692308  |
-| 2023-05 | 6   | 19       | 0.38               | 0.384615384615385  |
-| 2023-06 | 5   | 24       | 0.48               | 0.461538461538462  |
-| 2023-07 | 3   | 27       | 0.54               | 0.538461538461538  |
-| 2023-08 | 2   | 29       | 0.58               | 0.615384615384615  |
-| 2023-09 | 4   | 33       | 0.66               | 0.692307692307692  |
-| 2023-10 | 6   | 39       | 0.78               | 0.769230769230769  |
-| 2023-12 | 4   | 43       | 0.86               | 0.846153846153846  |
-| 2024-01 | 5   | 48       | 0.96               | 0.923076923076923  |
-| 2024-02 | 2   | 50       | 1.0                | 1.0                |
-```
-
-1. `sum()` выполняет промежуточный итог
-2. `cume_dist()` — это доля просмотренных на данный момент строк.
-3. Итак, столбец num_done — это количество проведенных экспериментов…
-4. Completed_progress — это доля выполненных экспериментов…
-5. а Linear_progress — это доля пройденного времени.
-
-### Опережение и отставание (LEAD and LAG)
-
-```sql
-with ym_num as (
-    select
-        strftime('%Y-%m', started) as ym,
-        count(*) as num
-    from experiment
-    group by ym
-)
-select
-    ym,
-    lag(num) over (order by ym) as prev_num,
-    num,
-    lead(num) over (order by ym) as next_num
-from ym_num
-order by ym;
-```
-```
-|   ym    | prev_num | num | next_num |
-|---------|----------|-----|----------|
-| 2023-01 |          | 2   | 5        |
-| 2023-02 | 2        | 5   | 5        |
-| 2023-03 | 5        | 5   | 1        |
-| 2023-04 | 5        | 1   | 6        |
-| 2023-05 | 1        | 6   | 5        |
-| 2023-06 | 6        | 5   | 3        |
-| 2023-07 | 5        | 3   | 2        |
-| 2023-08 | 3        | 2   | 4        |
-| 2023-09 | 2        | 4   | 6        |
-| 2023-10 | 4        | 6   | 4        |
-| 2023-12 | 6        | 4   | 5        |
-| 2024-01 | 4        | 5   | 2        |
-| 2024-02 | 5        | 2   |          |
-```
-
-1. Используйте strftime для извлечения года и месяца
-2. Обработка даты/времени не является сильной стороной SQLite.
-3. Используйте оконные функции `lead` и `lag` для смещения значений.
-4. Недоступные значения вверху или внизу равны `null`.
-
-### Границы (Boundaries)
-
-1. Документация по оконным функциям SQLite описывает три типа окон и пять видов границ окон.
-2. Каждый тип нужно использовать по ситуации
-
-### Партицированые окна (Partitioned Windows)
-
-```sql
-with y_m_num as (
-    select
-        strftime('%Y', started) as year,
-        strftime('%m', started) as month,
-        count(*) as num
-    from experiment
-    group by year, month
-)
-select
-    year,
-    month,
-    num,
-    sum(num) over (partition by year order by month) as num_done
-from y_m_num
-order by year, month;
-```
-```
-| year | month | num | num_done |
-|------|-------|-----|----------|
-| 2023 | 01    | 2   | 2        |
-| 2023 | 02    | 5   | 7        |
-| 2023 | 03    | 5   | 12       |
-| 2023 | 04    | 1   | 13       |
-| 2023 | 05    | 6   | 19       |
-| 2023 | 06    | 5   | 24       |
-| 2023 | 07    | 3   | 27       |
-| 2023 | 08    | 2   | 29       |
-| 2023 | 09    | 4   | 33       |
-| 2023 | 10    | 6   | 39       |
-| 2023 | 12    | 4   | 43       |
-| 2024 | 01    | 5   | 5        |
-| 2024 | 02    | 2   | 7        |
-```
-
-1. Партиции создаются по группам
-2. Таким образом, эксперименты начинаются с начала каждого года.
-
-#### Упражнение 
-
-1. Создайте запрос, который:
-    1. Находит уникальный вес пингвинов в базе данных `penguins`;
-    2. Отсортируйте их 
-    3. Найдите разницу между каждым последующим отдельным весом
-    4. Подсчитайте, сколько раз появляется каждое уникальное различие.
-
 ### Объяснение плана запроса
 
 ```sql
@@ -1094,3 +785,38 @@ inner join together
 | Kartik Gupta    | Abram Chokshi    |
 | Pranay Khanna   | Romil Kapoor     |
 ```
+
+## Импорт CSV файлов
+
+- CSV (Comma Separated Values - данные разделённые запятой) - один из популярных форматов хранения данных.
+- Каждая строка файла представляет собой одну запись, а столбцы разделены запятыми.
+- SQLite и большинство других СУБД имеют инструменты для импорта и экспорта CSV.
+
+### Процесс импорта в SQLite:
+1. Определение таблицы
+2. Импорт данных
+3. Преобразование пустых строк в значения NULL (при нелбходимости).
+4. Преобразование типов из текста в любые (не показано ниже).
+
+```sql
+-- удаляем таблицу, если она существует
+drop table if exists penguins;
+
+-- импортируем данные из CSV файла
+.mode csv penguins
+.import misc/penguins.csv penguins
+
+-- конвертируем пустые строки в null
+update penguins set species = null where species = '';
+update penguins set island = null where island = '';
+update penguins set bill_length_mm = null where bill_length_mm = '';
+update penguins set bill_depth_mm = null where bill_depth_mm = '';
+update penguins set flipper_length_mm = null where flipper_length_mm = '';
+update penguins set body_mass_g = null where body_mass_g = '';
+update penguins set sex = null where sex = '';
+```
+
+#### Упражнение
+
+1. Каковы будут типы данных столбцов в таблице `penguins`, созданной с помощью импорта CSV, показанного выше? 
+2. Как можно исправить те, которые требуют исправления?
