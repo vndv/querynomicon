@@ -1,6 +1,6 @@
 # Инструменты
 
-> Список терминов: [1-to-1 relation](glossary.md#отношение-один-к-одному-1-to-1-relation), [1-to-many relation](glossary.md#отношение-один-ко-многим-1-to-many-relation), [alias](glossary.md#псевдоним-alias), [autoincrement](glossary.md#автоинкремент-autoincrement), [B-tree](glossary.md#бинарное-дерево-b-tree), [common table expression (CTE)](glossary.md#общее-табличное-выражение-common-table-expression-cte), [correlated subquery](glossary.md#коррелированный-подзапрос-correlated-subquery), [data migration](glossary.md#мигрция-данных-data-migration), [entity-relationship diagram](glossary.md#диаграмма-сущность-связь-entity-relationship-diagram), [expression](glossary.md#выражение-expression), [foreign key](glossary.md#внешний-ключ-foreign-key), [index](glossary.md#индекс-index), [join table](glossary.md#соединение-join), [many-to-many relation](glossary.md#отношение-многие-ко-многим--many-to-many-relation), [primary key](glossary.md#первичный-ключ-primary-key), [statement](glossary.md#оператор-statement), [subquery](glossary.md#подзапрос-subquery), [table-valued function](glossary.md#табличная-функция-table-valued-function), [vectorization](glossary.md#векторизация-vectorization), [window function](glossary.md#оконная-функция-window-function)
+> Список терминов: [1-to-1 relation](glossary.md#отношение-один-к-одному-1-to-1-relation), [1-to-many relation](glossary.md#отношение-один-ко-многим-1-to-many-relation), [alias](glossary.md#псевдоним-alias), [autoincrement](glossary.md#автоинкремент-autoincrement), [B-tree](glossary.md#бинарное-дерево-b-tree), [common table expression (CTE)](glossary.md#общее-табличное-выражение-common-table-expression-cte), [correlated subquery](glossary.md#коррелированный-подзапрос-correlated-subquery), [data migration](glossary.md#мигрция-данных-data-migration), [entity-relationship diagram](glossary.md#диаграмма-сущность-связь-entity-relationship-diagram), [expression](glossary.md#выражение-expression), [foreign key](glossary.md#внешний-ключ-foreign-key), [index](glossary.md#индекс-index), [join table](glossary.md#соединение-join), [many-to-many relation](glossary.md#отношение-многие-ко-многим--many-to-many-relation), [primary key](glossary.md#первичный-ключ-primary-key), [statement](glossary.md#оператор-statement), [subquery](glossary.md#подзапрос-subquery), [table-valued function](glossary.md#табличная-функция-table-valued-function), [vectorization](glossary.md#векторизация-vectorization), [window function](glossary.md#оконная-функция-window-function), [Базовый случай (base-case)](/resources/glossary.md?id=Базовый-случай-base-case), [Бесконечная рекурсия (infinite recursion)](/resources/glossary.md?id=Бесконечная-рекурсия-infinite-recursion), [Временная таблица (temporary table)](/resources/glossary.md?id=Временная-таблица-temporary-table), [Материализованное представление (materialized view)](/resources/glossary.md?id=Материализованное-представление-materialized-view), [Представление (view)](/resources/glossary.md?id=Представление-view), [Рекурсивное табличное выражение (recursive cte)](/resources/glossary.md?id=Рекурсивное-табличное-выражение-recursive-cte), [Рекурсивный случай (recursive case)](/resources/glossary.md?id=Рекурсивный-случай-recursive-case)
 
 
 ### Неправильное отрицание
@@ -208,7 +208,95 @@ order by name;
 
 - Соединение может быть быстрее, а может и нет чем коррелированный подзапрос. Истинна определяется практикой.
 
-## Общие табличные выражения  (Common Table Expression, CTE)
+## Производные таблицы
+
+### Временные таблицы
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/67d427000f1c354777f8701e548a0896/))
+
+```sql
+-- создаем временную таблицу
+create temporary table bi_contact (
+    left text,
+    right text
+);
+
+-- вносим данные во временную таблицу на основе данных из таблицы `contact`
+insert into bi_contact
+select
+    left, right from contact
+    union all
+    select right, left from contact
+;
+-- проверяем результат (данные дублированы)
+select count(*) original_count from contact;
+
+select count(*) num_bi_contacts from bi_contact;
+```
+```
+| original_count |
+|----------------|
+| 8              |
+
+| num_bi_contacts |
+|-----------------|
+| 16              |
+```
+
+- Создайте временную таблицу вместо использования длинной цепочки CTE.
+- Временная таблица существует только до тех пор, пока длится сеанс (не сохраняется на диске).
+- Дублируйте информацию вместо написания более сложного запроса.
+
+### Представления (views)
+
+```sql
+create view if not exists
+active_penguins (
+    species,
+    island,
+    bill_length_mm,
+    bill_depth_mm,
+    flipper_length_mm,
+    body_mass_g,
+    sex
+) as
+select
+    species,
+    island,
+    bill_length_mm,
+    bill_depth_mm,
+    flipper_length_mm,
+    body_mass_g,
+    sex
+from penguins
+where active;
+
+select
+    species,
+    count(*) as num
+from active_penguins;
+group by species;
+```
+```
+|  species  | num |
+|-----------|-----|
+| Chinstrap | 68  |
+| Gentoo    | 124 |
+```
+
+- Представление — это сохраненный запрос, который могут вызывать другие запросы.
+- Представление вычисляется каждый раз при использовании.
+- Похоже на CTE, но:
+    - Может совместно использоваться запросами.
+    - Представления в SQL появились первыми. CTE относительно новый инструмент.
+    - Некоторые СУБД предлагают материализованные представления - временные таблицы с обновлением по требованию.
+
+#### Упражнение
+
+1. Создайте представление в базе данных журнала лаборатории под названием `busy` с двумя столбцами: `machine_id` и `total_log_length`. В первом столбце пердставьте числовой идентификатор каждой машины; во втором - общее количество записей журнала для этой машины.
+
+
+### Общие табличные выражения  (Common Table Expression, CTE)
 
 ```sql
 with grouped as (
@@ -240,6 +328,55 @@ limit 5;
 - Используйте общее табличное выражение (CTE), чтобы сделать запросы более понятными.
 - Вложенные подзапросы быстро становятся трудными для понимания.
 - База данных решает, как оптимизировать запрос.
+
+### Проверка знаний
+
+<img src="./assets/advanced_temp_concept_map.svg" alt="Проверка знаний" style="max-width:100%; height:auto;">
+
+### Рекурсивные запросы
+
+([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/393c66e0a9580d88a89f9ef8ed4474d1/))
+
+```sql
+with recursive descendent as (
+    select
+        'Clemente' as person,
+        0 as generations
+    union all
+    select
+        lineage.child as person,
+        descendent.generations + 1 as generations
+    from descendent 
+    inner join lineage
+        on descendent.person = lineage.parent
+)
+select
+    person,
+    generations
+from descendent;
+```
+```
+|  person  | generations |
+|----------|-------------|
+| Clemente | 0           |
+| Homero   | 1           |
+| Ivonne   | 1           |
+| Lourdes  | 2           |
+| Santiago | 3           |
+```
+
+- Используйте рекурсивное CTE для создания временной таблицы (потомка).
+- Базовый случай задает эту таблицу.
+- Рекурсивный случай опирается на значения, уже находящиеся в этой таблице, и внешние таблицы.
+- Используйте `union all` для объединения строк
+  *Можно использовать `union`, но это имеет более низкую производительность (необходимо проверять уникальность каждый раз)*
+- Рекурсия останавливается, когда рекурсивный случай выдает пустой набор строк (нечего нового добавлять).
+- Затем выберите нужные значения из CTE
+
+#### Упражнение
+
+1. Измените рекурсивный запрос, показанный выше, чтобы использовать `union` вместо `union all`. 
+2. Влияет ли это на результат? Почему или почему нет?
 
 ## Оконные функции
 
