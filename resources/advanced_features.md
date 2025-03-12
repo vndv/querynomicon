@@ -1,4 +1,4 @@
-> Список терминов: [Базовый случай (base-case)](/resources/glossary.md?id=Базовый-случай-base-case), [Бесконечная рекурсия (infinite recursion)](/resources/glossary.md?id=Бесконечная-рекурсия-infinite-recursion), [Большой двоичный объект (binary large object BLOB)](/resources/glossary.md?id=Большой-двоичный-объект-binary-large-object-blob), [Временная таблица (temporary table)](/resources/glossary.md?id=Временная-таблица-temporary-table), [Javascript Object Notation (JSON)](/resources/glossary.md?id=javascript-object-notation-json), [Материализованное представление (materialized view)](/resources/glossary.md?id=Материализованное-представление-materialized-view), [Представление (view)](/resources/glossary.md?id=Представление-view), [Путь (path expression)](/resources/glossary.md?id=Путь-path-expression), [Рекурсивное табличное выражение (recursive cte)](/resources/glossary.md?id=Рекурсивное-табличное-выражение-recursive-cte), [Рекурсивный случай (recursive case)](/resources/glossary.md?id=Рекурсивный-случай-recursive-case), [Триггер (trigger)](/resources/glossary.md?id=Триггер-trigger), [UPSERT](/resources/glossary.md?id=UPSERT)
+> Список терминов: [Большой двоичный объект (binary large object BLOB)](/resources/glossary.md?id=Большой-двоичный-объект-binary-large-object-blob),  [Javascript Object Notation (JSON)](/resources/glossary.md?id=javascript-object-notation-json), [Путь (path expression)](/resources/glossary.md?id=Путь-path-expression), [Триггер (trigger)](/resources/glossary.md?id=Триггер-trigger), [UPSERT](/resources/glossary.md?id=UPSERT)
 
 
 ## Большой двоичный объект (binary large object BLOB)
@@ -285,59 +285,6 @@ group by species;
 
 - Используйте `tombstone` для обозначения (не)активных записей
 - Теперь каждый запрос должен включать его в условие.
-
-## Представления (views)
-
-```sql
-create view if not exists
-active_penguins (
-    species,
-    island,
-    bill_length_mm,
-    bill_depth_mm,
-    flipper_length_mm,
-    body_mass_g,
-    sex
-) as
-select
-    species,
-    island,
-    bill_length_mm,
-    bill_depth_mm,
-    flipper_length_mm,
-    body_mass_g,
-    sex
-from penguins
-where active;
-
-select
-    species,
-    count(*) as num
-from active_penguins;
-group by species;
-```
-```
-|  species  | num |
-|-----------|-----|
-| Chinstrap | 68  |
-| Gentoo    | 124 |
-```
-
-- Представление — это сохраненный запрос, который могут вызывать другие запросы.
-- Представление вычисляется каждый раз при использовании.
-- Похоже на CTE, но:
-    - Может совместно использоваться запросами.
-    - Представления в SQL появились первыми. CTE относительно новый инструмент.
-    - Некоторые СУБД предлагают материализованные представления - временные таблицы с обновлением по требованию.
-
-#### Упражнение
-
-1. Создайте представление в базе данных журнала лаборатории под названием `busy` с двумя столбцами: `machine_id` и `total_log_length`. В первом столбце пердставьте числовой идентификатор каждой машины; во втором - общее количество записей журнала для этой машины.
-
-### Проверка знаний
-
-<img src="./assets/advanced_temp_concept_map.svg" alt="Проверка знаний" style="max-width:100%; height:auto;">
-
 
 ## Напоминание о часах
 
@@ -701,51 +648,6 @@ select * from lineage;
 #### Упражнение
 1. Напишите запрос, который использует самосоединение (self join) для поиска внуков каждого человека.
 
-## Рекурсивные запросы
-
-([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/393c66e0a9580d88a89f9ef8ed4474d1/))
-
-```sql
-with recursive descendent as (
-    select
-        'Clemente' as person,
-        0 as generations
-    union all
-    select
-        lineage.child as person,
-        descendent.generations + 1 as generations
-    from descendent 
-    inner join lineage
-        on descendent.person = lineage.parent
-)
-select
-    person,
-    generations
-from descendent;
-```
-```
-|  person  | generations |
-|----------|-------------|
-| Clemente | 0           |
-| Homero   | 1           |
-| Ivonne   | 1           |
-| Lourdes  | 2           |
-| Santiago | 3           |
-```
-
-- Используйте рекурсивное CTE для создания временной таблицы (потомка).
-- Базовый случай задает эту таблицу.
-- Рекурсивный случай опирается на значения, уже находящиеся в этой таблице, и внешние таблицы.
-- Используйте `union all` для объединения строк
-  *Можно использовать `union`, но это имеет более низкую производительность (необходимо проверять уникальность каждый раз)*
-- Рекурсия останавливается, когда рекурсивный случай выдает пустой набор строк (нечего нового добавлять).
-- Затем выберите нужные значения из CTE
-
-#### Упражнение
-
-1. Измените рекурсивный запрос, показанный выше, чтобы использовать `union` вместо `union all`. 
-2. Влияет ли это на результат? Почему или почему нет?
-
 ## База данных отслеживания контактов
 
 ([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/7ce208fe11ac9be3fbbb4105304bc5c6/))
@@ -793,43 +695,6 @@ select * from contact;
     src="./assets/advanced_recursive_contacts.svg" 
     alt="Диаграмма контактов (диаграмма с прямоугольниками и линиями, показывающая, кто с кем контактировал)" 
     style="max-width:100%; height:auto;">
-
-## Временные таблицы
-
-([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/67d427000f1c354777f8701e548a0896/))
-
-```sql
--- создаем временную таблицу
-create temporary table bi_contact (
-    left text,
-    right text
-);
-
--- вносим данные во временную таблицу на основе данных из таблицы `contact`
-insert into bi_contact
-select
-    left, right from contact
-    union all
-    select right, left from contact
-;
--- проверяем результат (данные дублированы)
-select count(*) original_count from contact;
-
-select count(*) num_bi_contacts from bi_contact;
-```
-```
-| original_count |
-|----------------|
-| 8              |
-
-| num_bi_contacts |
-|-----------------|
-| 16              |
-```
-
-- Создайте временную таблицу вместо использования длинной цепочки CTE.
-- Временная таблица существует только до тех пор, пока длится сеанс (не сохраняется на диске).
-- Дублируйте информацию вместо написания более сложного запроса.
 
 ## Обновление идентификаторов групп
 
