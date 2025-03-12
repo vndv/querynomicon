@@ -1,4 +1,4 @@
-> Список терминов: [Базовый случай (base-case)](/resources/glossary.md?id=Базовый-случай-base-case), [Бесконечная рекурсия (infinite recursion)](/resources/glossary.md?id=Бесконечная-рекурсия-infinite-recursion), [Большой двоичный объект (binary large object BLOB)](/resources/glossary.md?id=Большой-двоичный-объект-binary-large-object-blob), [Временная таблица (temporary table)](/resources/glossary.md?id=Временная-таблица-temporary-table), [Javascript Object Notation (JSON)](/resources/glossary.md?id=javascript-object-notation-json), [Материализованное представление (materialized view)](/resources/glossary.md?id=Материализованное-представление-materialized-view), [Представление (view)](/resources/glossary.md?id=Представление-view), [Путь (path expression)](/resources/glossary.md?id=Путь-path-expression), [Рекурсивное табличное выражение (recursive cte)](/resources/glossary.md?id=Рекурсивное-табличное-выражение-recursive-cte), [Рекурсивный случай (recursive case)](/resources/glossary.md?id=Рекурсивный-случай-recursive-case), [Триггер (trigger)](/resources/glossary.md?id=Триггер-trigger), [UPSERT](/resources/glossary.md?id=UPSERT)
+> Список терминов: [Большой двоичный объект (binary large object BLOB)](/resources/glossary.md?id=Большой-двоичный-объект-binary-large-object-blob),  [Javascript Object Notation (JSON)](/resources/glossary.md?id=javascript-object-notation-json), [Путь (path expression)](/resources/glossary.md?id=Путь-path-expression), [Триггер (trigger)](/resources/glossary.md?id=Триггер-trigger), [UPSERT](/resources/glossary.md?id=UPSERT)
 
 
 ## Большой двоичный объект (binary large object BLOB)
@@ -286,59 +286,6 @@ group by species;
 - Используйте `tombstone` для обозначения (не)активных записей
 - Теперь каждый запрос должен включать его в условие.
 
-## Представления (views)
-
-```sql
-create view if not exists
-active_penguins (
-    species,
-    island,
-    bill_length_mm,
-    bill_depth_mm,
-    flipper_length_mm,
-    body_mass_g,
-    sex
-) as
-select
-    species,
-    island,
-    bill_length_mm,
-    bill_depth_mm,
-    flipper_length_mm,
-    body_mass_g,
-    sex
-from penguins
-where active;
-
-select
-    species,
-    count(*) as num
-from active_penguins;
-group by species;
-```
-```
-|  species  | num |
-|-----------|-----|
-| Chinstrap | 68  |
-| Gentoo    | 124 |
-```
-
-- Представление — это сохраненный запрос, который могут вызывать другие запросы.
-- Представление вычисляется каждый раз при использовании.
-- Похоже на CTE, но:
-    - Может совместно использоваться запросами.
-    - Представления в SQL появились первыми. CTE относительно новый инструмент.
-    - Некоторые СУБД предлагают материализованные представления - временные таблицы с обновлением по требованию.
-
-#### Упражнение
-
-1. Создайте представление в базе данных журнала лаборатории под названием `busy` с двумя столбцами: `machine_id` и `total_log_length`. В первом столбце пердставьте числовой идентификатор каждой машины; во втором - общее количество записей журнала для этой машины.
-
-### Проверка знаний
-
-<img src="./assets/advanced_temp_concept_map.svg" alt="Проверка знаний" style="max-width:100%; height:auto;">
-
-
 ## Напоминание о часах
 
 ```sql
@@ -402,6 +349,9 @@ CHECK constraint failed: billable > 0.0
 
 ## Транзакции
 
+Транзакция это группа запросов, которые выполняются как единое целое. Если один из запросов в транзакции не может быть выполнен, все команды в транзакции отменяются.
+Для начала транзакции используется оператор `begin transaction`, а для завершения - `commit`. Оператор `rollback` отменяет все изменения, внесенные с начала транзакции.
+
 ```sql
 create table job (
     name text not null,
@@ -409,26 +359,32 @@ create table job (
     check (billable > 0.0)
 );
 
+begin transaction; -- начало транзакции
 insert into job values ('Калибровка', 1.5);
+commit; -- завершение транзакции
 
-begin transaction;
+begin transaction; -- начало транзакции
 insert into job values ('Очистка', 0.5);
-rollback;
+insert into job values ('Проверка', 1.5);
+rollback; -- отмена транзакции
 
 select * from job;
 ```
+Запросы внутри отменённой транзакции не вступают в силу.
 ```
 | name       | billable |
 |------------|----------|
 | Калибровка | 1.5      |
 ```
+([sql транзакции онлайн](https://sqlize.online/sql/sqlite3_data/d6c8e6561fb57ac78e90f11147352eb5/))
 
 - Операторы вне транзакции выполняются и фиксируются в базе немедленно.
-- Операторы внутри транзакции не вступают в силу до тех пор, пока транзакция не будет полностью и успешно завершена или отменена.
+- Операторы внутри транзакции не вступают в силу до тех пор, пока транзакция не будет полностью и успешно завершена.
 - В транзакции может быть любое количество операторов.
-- Но в SQLite нельзя вкладывать транзакции. (Другие СУБД поддерживают это.)
+- При отмене транзакции отменяются все изменения выполненные с её начала.
+- В SQLite нельзя использовать вложенные транзакции (одна транзакция находится внутри другой). Другие СУБД иогут поддерживать это.
 
-## Откат в результате ограничения
+### Откат транзакции в результате ограничения
 
 ([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/72a1ca04957cfe43afd251b552587723/))
 
@@ -458,7 +414,7 @@ CHECK constraint failed: billable > 0.0 (19)
 
 Второй insert откатился сразу после возникновения ошибки, но первый insert вступил в силу.
 
-## Откат в запросах
+### Откат в запросах
 
 ([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/7e288b6fec3ad8b9239cb36c19bb5f5b/))
 
@@ -557,14 +513,14 @@ select * from jobs_done;
     ``` 
 ## Триггеры
 
-- Триггер — это автоматически выполняемый код, который реагирует на изменения в базе данных.
-- Триггеры могут выполняться до или после операции.
-- Триггеры могут выполняться на вставку, обновление или удаление.
-- Триггеры могут быть использованы для проверки данных, обновления связанных таблиц и многого другого.
-- Триггеры могут быть отключены, включены или удалены.
-- Триггеры могут быть созданы в любой момент, в любой таблице и в любой базе данных.
-- Триггеры могут быть созданы в любой СУБД, но синтаксис может отличаться.
-- Внутри триггера можнообращаться к старой и новой версии записи как old.column и new.column.
+    - Триггер — это автоматически выполняемый код, который реагирует на изменения в базе данных.
+    - Триггеры могут выполняться до или после операции.
+    - Триггеры могут выполняться на вставку, обновление или удаление.
+    - Триггеры могут быть использованы для проверки данных, обновления связанных таблиц и многого другого.
+    - Триггеры могут быть отключены, включены или удалены.
+    - Триггеры могут быть созданы в любой момент, в любой таблице и в любой базе данных.
+    - Триггеры могут быть созданы в любой СУБД, но синтаксис может отличаться.
+    - Внутри триггера можнообращаться к старой и новой версии записи как old.column и new.column.
 
 ### Создание триггеров
 
@@ -585,10 +541,12 @@ create table total (
 
 -- создаем триггер для обновления таблицы `total`
 create trigger total_trigger
-before insert on job
+before insert -- триггер срабатывает перед вставкой
+on job -- в таблицу job
 begin
+    -- код который выполняется при срабатывании триггера
     insert into total values
-        (new.person, new.reported)
+        (new.person, new.reported) -- new - обозначает значения из вставляемой строки
     on conflict(person) do update set hours = hours + new.reported;
 end;
 ```
@@ -690,51 +648,6 @@ select * from lineage;
 #### Упражнение
 1. Напишите запрос, который использует самосоединение (self join) для поиска внуков каждого человека.
 
-## Рекурсивные запросы
-
-([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/393c66e0a9580d88a89f9ef8ed4474d1/))
-
-```sql
-with recursive descendent as (
-    select
-        'Clemente' as person,
-        0 as generations
-    union all
-    select
-        lineage.child as person,
-        descendent.generations + 1 as generations
-    from descendent 
-    inner join lineage
-        on descendent.person = lineage.parent
-)
-select
-    person,
-    generations
-from descendent;
-```
-```
-|  person  | generations |
-|----------|-------------|
-| Clemente | 0           |
-| Homero   | 1           |
-| Ivonne   | 1           |
-| Lourdes  | 2           |
-| Santiago | 3           |
-```
-
-- Используйте рекурсивное CTE для создания временной таблицы (потомка).
-- Базовый случай задает эту таблицу.
-- Рекурсивный случай опирается на значения, уже находящиеся в этой таблице, и внешние таблицы.
-- Используйте `union all` для объединения строк
-  *Можно использовать `union`, но это имеет более низкую производительность (необходимо проверять уникальность каждый раз)*
-- Рекурсия останавливается, когда рекурсивный случай выдает пустой набор строк (нечего нового добавлять).
-- Затем выберите нужные значения из CTE
-
-#### Упражнение
-
-1. Измените рекурсивный запрос, показанный выше, чтобы использовать `union` вместо `union all`. 
-2. Влияет ли это на результат? Почему или почему нет?
-
 ## База данных отслеживания контактов
 
 ([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/7ce208fe11ac9be3fbbb4105304bc5c6/))
@@ -782,43 +695,6 @@ select * from contact;
     src="./assets/advanced_recursive_contacts.svg" 
     alt="Диаграмма контактов (диаграмма с прямоугольниками и линиями, показывающая, кто с кем контактировал)" 
     style="max-width:100%; height:auto;">
-
-## Временные таблицы
-
-([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/67d427000f1c354777f8701e548a0896/))
-
-```sql
--- создаем временную таблицу
-create temporary table bi_contact (
-    left text,
-    right text
-);
-
--- вносим данные во временную таблицу на основе данных из таблицы `contact`
-insert into bi_contact
-select
-    left, right from contact
-    union all
-    select right, left from contact
-;
--- проверяем результат (данные дублированы)
-select count(*) original_count from contact;
-
-select count(*) num_bi_contacts from bi_contact;
-```
-```
-| original_count |
-|----------------|
-| 8              |
-
-| num_bi_contacts |
-|-----------------|
-| 16              |
-```
-
-- Создайте временную таблицу вместо использования длинной цепочки CTE.
-- Временная таблица существует только до тех пор, пока длится сеанс (не сохраняется на диске).
-- Дублируйте информацию вместо написания более сложного запроса.
 
 ## Обновление идентификаторов групп
 
