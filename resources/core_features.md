@@ -3,7 +3,7 @@
 > Список терминов: 
 [Внутреннее соединение (inner join)](/resources/glossary.md?id=Внутреннее-соединение-inner-join), 
 [Левое внешнее соединение (left outer join)](/resources/glossary.md?id=Левое-внешнее-соединение-left-outer-join), 
-[Объединение таблиц (join)](/resources/glossary.md?id=Объединение-таблиц-join), 
+[Cоединение таблиц (join)](/resources/glossary.md?id=Объединение-таблиц-join), 
 [Перекрестное соединение (cross join)](/resources/glossary.md?id=Перекрестное-соединение-cross-join), 
 [Полное внешнее соединение (full outer join)](/resources/glossary.md?id=Полное-внешнее-соединение-full-outer-join),
 [Соединение (join)](/resources/glossary.md?id=Соединение-join), 
@@ -328,7 +328,7 @@ group by sex;
 
 <img src="./assets/core_aggregate_concept_map.svg" alt="Описание" style="max-width:100%; height:auto;">
 
-## Объединение таблиц (join)
+## Cоединение таблиц (join)
 
 <img src="./assets/join.svg" alt="Объединение таблиц" style="max-width:100%; height:auto;">
 
@@ -549,3 +549,66 @@ limit 10;
 ### Проверка знаний
 
 <img src="./assets/core_join_concept_map.svg" alt="Описание" style="max-width:100%; height:auto;">
+
+## Операции над множествами (union, intersect, except)
+
+Команды `union`, `intersect` и `except` позволяют объединять результаты запросов. Результаты должны иметь одинаковое количество столбцов и типы данных. В результате получается один набор данных.
+
+### Объединение результатов запросов (union)
+
+(выполнить union онлайн](https://sqlize.online/sql/sqlite3_data/f819e542b5894bf961e6d97cd2e2ae8c/))
+
+```sql
+select
+    species, island
+from little_penguins
+union 
+select
+    species, island
+from penguins;
+```
+
+- `union` объединяет результаты двух запросов в один.
+- Результаты должны иметь одинаковое количество столбцов и типы данных.
+- `union` удаляет дубликаты строк.
+- `union all` сохраняет дубликаты строк.
+
+#### Упражнения
+1. Замените `union` на `union all` в предыдущем запросе. Как это повлияет на результат?
+
+### Пересечение результатов запросов (intersect)
+
+Найдём виды и острова которые встречаются в обеих таблицах.
+
+(выполнить intersect онлайн](https://sqlize.online/sql/sqlite3_data/dc824423c28c625de77475434205cf94/))
+
+```sql
+select
+    species, island
+from little_penguins
+intersect
+select
+    species, island
+from penguins;
+```
+- `intersect` возвращает только строки, которые присутствуют в обоих результатах запросов.
+
+### Разность результатов запросов (except)
+
+Найдём виды и острова из таблицы `penguins`, которые не встречаются в таблице `little_penguins`.
+
+(выполнить except онлайн](https://sqlize.online/sql/sqlite3_data/2925a5df3b39fb8e4151385d08786927/))
+
+```sql
+select
+    species, island
+from penguins
+except
+select
+    species, island
+from little_penguins;
+```
+- `except` возвращает только строки, которые присутствуют в первом результате запроса, но отсутствуют во втором.
+
+#### Упражнения
+1. [Найдите виды пингвинов, которые встречаются на всех островах](https://sqltest.online/ru/question/sqlite/penguins-species-on-all-islands).
