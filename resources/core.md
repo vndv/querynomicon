@@ -70,7 +70,7 @@ select * from little_penguins;
 Дубликаты разрешены!
 Разрывы строк приветствуются для удобства чтения, вам все вернется.
 
-<div data-sqlize-editor data-sql-version="sqlite3_data">
+<div data-sqlize-editor data-sql-version="sqlite3_data" code-rows="8">
 select
     -- перечисляем колонки, которые хотим увидеть
     species,
