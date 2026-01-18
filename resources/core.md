@@ -67,7 +67,7 @@ select * from little_penguins;
 
 ([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/9484db9d3625b78b2ad204aa48596150/))
 
-<div data-sqlize-editor data-sql-version="sqlite3">
+<div data-sqlize-editor data-sql-version="sqlite3_data">
 select
     -- перечисляем колонки, которые хотим увидеть
     species,
