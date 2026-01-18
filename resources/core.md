@@ -67,32 +67,14 @@ select * from little_penguins;
 
 ([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/9484db9d3625b78b2ad204aa48596150/))
 
-<div data-sqlize-editor data-sql-version="psql15">
-
-```sql
+<div data-sqlize-editor data-sql-version="sqlite3">
 select
     -- перечисляем колонки, которые хотим увидеть
     species,
     island,
     sex
 from little_penguins;
-```
-
 </div>
-```
-|  species  |  island   |  sex   |
-|-----------|-----------|--------|
-| Gentoo    | Biscoe    | MALE   |
-| Adelie    | Dream     | FEMALE |
-| Adelie    | Torgersen | FEMALE |
-| Chinstrap | Dream     | MALE   |
-| Adelie    | Dream     | FEMALE |
-| Adelie    | Dream     | FEMALE |
-| Adelie    | Dream     | FEMALE |
-| Gentoo    | Biscoe    | FEMALE |
-| Gentoo    | Biscoe    | MALE   |
-| Adelie    | Torgersen | FEMALE |
-```
 
 Для выбора определённых колонок укажите их имена разделенные запятыми.
 В любом порядке!
