@@ -677,3 +677,6 @@ where sex is null;
 ### NULL: концептуальная схема
 
 <img src="./assets/null_concept_map.svg" alt="концептуальная схема" style="max-width:100%; height:auto; margin-top: 2em;">
+
+<!-- Embedding the script -->
+<script src="https://sqlize.online/js/sqlize-embed.js"></script>
