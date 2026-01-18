@@ -67,14 +67,18 @@ select * from little_penguins;
 
 ([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/9484db9d3625b78b2ad204aa48596150/))
 
+<div data-sqlize-editor data-sql-version="psql15">
+
 ```sql
 select
-    -- перечисляум колонки, которые хотим увидеть
+    -- перечисляем колонки, которые хотим увидеть
     species,
     island,
     sex
 from little_penguins;
 ```
+
+</div>
 ```
 |  species  |  island   |  sex   |
 |-----------|-----------|--------|
