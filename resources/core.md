@@ -361,7 +361,7 @@ limit 5;
 
 Выполним запрос, который уже использовали ранее. Видно что в одной строке отсутствуют данные о поле пингвина.
 
-<div data-sqlize-editor data-sql-version="sqlite3_data" code-rows="8">
+<div data-sqlize-editor data-sql-version="sqlite3_data" code-rows="8" result-rows="8">
 select distinct
     species,
     sex,
@@ -372,7 +372,7 @@ where island = 'Biscoe';
 
 Если мы спросим о самках пингвинов, строка с отсутствующим полом будет отфильтрована и мы получаем следующий результат.
 
-<div data-sqlize-editor data-sql-version="sqlite3_data" code-rows="8">
+<div data-sqlize-editor data-sql-version="sqlite3_data" code-rows="8" result-rows="6">
 select distinct
     species,
     sex,
@@ -383,7 +383,7 @@ where island = 'Biscoe' and sex = 'FEMALE';
 
 Но если мы спросим о пингвинах, не являющихся самками, их мы тоже не получим эту строку.
 
-<div data-sqlize-editor data-sql-version="sqlite3_data" code-rows="8">
+<div data-sqlize-editor data-sql-version="sqlite3_data" code-rows="8" result-rows="6">
 select distinct
     species,
     sex,
@@ -394,13 +394,12 @@ where island = 'Biscoe' and sex != 'FEMALE';
 
 ### Тернарная логика
 
-([выполнить sql онлайн](https://sqlize.online/sql/sqlite3_data/f42a97eea4aabe84ac06069c2def564e/))
-
 - это логика, которая работает с тремя значениями: истиной, ложью и неопределенностью. В SQL это представлено значениями `true`, `false` и `null`.
 
-```sql
+<div data-sqlize-editor data-sql-version="sqlite3_data" code-rows="3" result-rows="6">
 select null = null;
-```
+</div>
+
 ```shell
 | null = null |
 |-------------|
