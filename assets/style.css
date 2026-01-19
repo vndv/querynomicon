@@ -1,7 +1,9 @@
 :root {
     --theme-color: #40BA83;
 }
-
+.markdown-section pre {
+    line-height: 1.2;
+}
 .markdown-section p {
     font-size: 1.125rem;
     line-height: 1.7;
