@@ -556,7 +556,7 @@ limit 10;
 
 ### Объединение результатов запросов (union)
 
-(выполнить union онлайн](https://sqlize.online/sql/sqlite3_data/f819e542b5894bf961e6d97cd2e2ae8c/))
+([выполнить union онлайн](https://sqlize.online/sql/sqlite3_data/f819e542b5894bf961e6d97cd2e2ae8c/))
 
 ```sql
 select
@@ -580,7 +580,7 @@ from penguins;
 
 Найдём виды и острова которые встречаются в обеих таблицах.
 
-(выполнить intersect онлайн](https://sqlize.online/sql/sqlite3_data/dc824423c28c625de77475434205cf94/))
+([выполнить intersect онлайн](https://sqlize.online/sql/sqlite3_data/dc824423c28c625de77475434205cf94/))
 
 ```sql
 select
@@ -597,7 +597,7 @@ from penguins;
 
 Найдём виды и острова из таблицы `penguins`, которые не встречаются в таблице `little_penguins`.
 
-(выполнить except онлайн](https://sqlize.online/sql/sqlite3_data/2925a5df3b39fb8e4151385d08786927/))
+([выполнить except онлайн](https://sqlize.online/sql/sqlite3_data/2925a5df3b39fb8e4151385d08786927/))
 
 ```sql
 select
